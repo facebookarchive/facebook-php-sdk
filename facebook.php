@@ -1,0 +1,629 @@
+<?php
+
+if (!function_exists('curl_init')) {
+  throw new Exception('Facebook needs the CURL PHP extension.');
+}
+if (!function_exists('json_decode')) {
+  throw new Exception('Facebook needs the JSON PHP extension.');
+}
+
+/**
+ * Thrown when an API call returns an exception.
+ *
+ * @author Naitik Shah <naitik@facebook.com>
+ */
+class FacebookApiException extends Exception
+{
+  /**
+   * The result from the API server that represents the exception information.
+   */
+  private $result;
+
+  /**
+   * Make a new API Exception with the given result.
+   *
+   * @param Array $result the result from the API server
+   */
+  public function __construct($result) {
+    $this->result = $result;
+
+    $code = isset($result['error_code']) ? $result['error_code'] : 0;
+    $msg  = isset($result['error'])
+              ? $result['error']['message'] : $result['error_msg'];
+    parent::__construct($msg, $code);
+  }
+
+  /**
+   * Return the associated result object returned by the API server.
+   *
+   * @returns Array the result from the API server
+   */
+  public function getResult() {
+    return $this->result;
+  }
+
+  /**
+   * Returns the associated type for the error. This will default to
+   * 'Exception' when a type is not available.
+   *
+   * @return String
+   */
+  public function getType() {
+    return
+      isset($this->result['error']) && isset($this->result['error']['type'])
+      ? $this->result['error']['type']
+      : 'Exception';
+  }
+
+  /**
+   * To make debugging easier.
+   *
+   * @returns String the string representation of the error
+   */
+  public function __toString() {
+    $str = $this->getType() . ': ';
+    if ($this->code != 0) {
+      $str .= $this->code . ': ';
+    }
+    return $str . $this->message;
+  }
+}
+
+/**
+ * Provides access to the Facebook Platform.
+ *
+ * @author Naitik Shah <naitik@facebook.com>
+ */
+class Facebook
+{
+  /**
+   * The User-Agent when making API calls.
+   */
+  const USER_AGENT = 'facebook-php-2.0';
+
+  /**
+   * List of error codes that trigger clearing of the session.
+   */
+  private static $SESSION_INVALID_ERRORS = array(
+    190, // Invalid OAuth Access Token
+  );
+
+  /**
+   * List of query parameters that get automatically dropped when rebuilding
+   * the current URL.
+   */
+  private static $DROP_QUERY_PARAMS = array(
+    'session',
+  );
+
+  /**
+   * Maps aliases to Facebook domains.
+   */
+  public static $DOMAIN_MAP = array(
+    'api'   => 'https://api.facebook.com/',
+    'graph' => 'https://graph.facebook.com/',
+    'www'   => 'https://www.facebook.com/',
+  );
+
+  /**
+   * The Application ID.
+   */
+  private $appId;
+
+  /**
+   * The Application API Secret.
+   */
+  private $apiSecret;
+
+  /**
+   * The active user session, if one is available.
+   */
+  private $session;
+
+  /**
+   * Indicates that we already loaded the session as best as we could.
+   */
+  private $sessionLoaded = false;
+
+  /**
+   * Indicates if Cookie support should be enabled.
+   */
+  private $cookieSupport = false;
+
+  /**
+   * Initialize a Facebook Application.
+   *
+   * The configuration:
+   * - appId: the application API key
+   * - secret: the application secret
+   * - cookie: (optional) boolean true to enable cookie support
+   *
+   * @param Array $config the application configuration
+   */
+  public function __construct($config) {
+    $this->setAppId($config['appId']);
+    $this->setApiSecret($config['secret']);
+    if (isset($config['cookie'])) {
+      $this->setCookieSupport($config['cookie']);
+    }
+  }
+
+  /**
+   * Set the Application ID.
+   *
+   * @param String $appId the API key
+   */
+  public function setAppId($appId) {
+    $this->appId = $appId;
+    return $this;
+  }
+
+  /**
+   * Get the API Key.
+   *
+   * @return String the API key
+   */
+  public function getAppId() {
+    return $this->appId;
+  }
+
+  /**
+   * Set the API Secret.
+   *
+   * @param String $appId the API Secret
+   */
+  public function setApiSecret($apiSecret) {
+    $this->apiSecret = $apiSecret;
+    return $this;
+  }
+
+  /**
+   * Get the API Secret.
+   *
+   * @return String the API Secret
+   */
+  public function getApiSecret() {
+    return $this->apiSecret;
+  }
+
+  /**
+   * Set the Cookie Support status.
+   *
+   * @param Boolean $cookieSupport the Cookie Support status
+   */
+  public function setCookieSupport($cookieSupport) {
+    $this->cookieSupport = $cookieSupport;
+    return $this;
+  }
+
+  /**
+   * Get the Cookie Support status.
+   *
+   * @return Boolean the Cookie Support status
+   */
+  public function useCookieSupport() {
+    return $this->cookieSupport;
+  }
+
+  /**
+   * Set the Session.
+   *
+   * @param Array $session the session
+   */
+  public function setSession($session=null) {
+    $session = $this->validateSessionObject($session);
+    $this->sessionLoaded = true;
+    $this->session = $session;
+    $this->setCookieFromSession($session);
+    return $this;
+  }
+
+  /**
+   * Get the session object. This will automatically look for a signed session
+   * sent via the Cookie or Query Parameters if needed.
+   *
+   * @return Array the session
+   */
+  public function getSession() {
+    if (!$this->sessionLoaded) {
+      $session = null;
+
+      // try loading session from $_GET
+      if (isset($_GET['session'])) {
+        $session = json_decode($_GET['session'], true);
+        $session = $this->validateSessionObject($session);
+      }
+
+      // try loading session from cookie if necessary
+      if (!$session && $this->useCookieSupport()) {
+        $cookieName = $this->getSessionCookieName();
+        if (isset($_COOKIE[$cookieName])) {
+          $session = array();
+          parse_str(trim($_COOKIE[$cookieName], '"'), $session);
+          $session = $this->validateSessionObject($session);
+        }
+      }
+
+      $this->setSession($session);
+    }
+
+    return $this->session;
+  }
+
+  /**
+   * Get the UID from the session.
+   *
+   * @return String the UID if available
+   */
+  public function getUser() {
+    $session = $this->getSession();
+    return $session ? $session['uid'] : null;
+  }
+
+  /**
+   * Get a Login URL for use with redirects. By default, full page redirect is
+   * assumed. If you are using the generated URL with a window.open() call in
+   * JavaScript, you can pass in display=popup as part of the $params.
+   *
+   * The parameters:
+   * - next: the url to go to after a successful login
+   * - cancel_url: the url to go to after the user cancels
+   * - req_perms: comma separated list of requested extended perms
+   * - display: can be "page" (default, full page) or "popup"
+   *
+   * @param Array $params provide custom parameters
+   * @return String the URL for the login flow
+   */
+  public function getLoginUrl($params=array()) {
+    $currentUrl = $this->getCurrentUrl();
+    return $this->getUrl(
+      'www',
+      'login.php',
+      array_merge(array(
+        'api_key'         => $this->getAppId(),
+        'cancel_url'      => $currentUrl,
+        'display'         => 'page',
+        'fbconnect'       => 1,
+        'next'            => $currentUrl,
+        'return_session'  => 1,
+        'session_version' => 3,
+        'v'               => '1.0',
+      ), $params)
+    );
+  }
+
+  /**
+   * Get a Logout URL suitable for use with redirects.
+   *
+   * The parameters:
+   * - next: the url to go to after a successful logout
+   *
+   * @param Array $params provide custom parameters
+   * @return String the URL for the logout flow
+   */
+  public function getLogoutUrl($params=array()) {
+    $session = $this->getSession();
+    return $this->getUrl(
+      'www',
+      'logout.php',
+      array_merge(array(
+        'api_key'     => $this->getAppId(),
+        'next'        => $this->getCurrentUrl(),
+        'session_key' => $session['session_key'],
+      ), $params)
+    );
+  }
+
+  /**
+   * Get a login status URL to fetch the status from facebook.
+   *
+   * The parameters:
+   * - ok_session: the URL to go to if a session is found
+   * - no_session: the URL to go to if the user is not connected
+   * - no_user: the URL to go to if the user is not signed into facebook
+   *
+   * @param Array $params provide custom parameters
+   * @return String the URL for the logout flow
+   */
+  public function getLoginStatusUrl($params=array()) {
+    return $this->getUrl(
+      'www',
+      'extern/login_status.php',
+      array_merge(array(
+        'api_key'         => $this->getAppId(),
+        'no_session'      => $this->getCurrentUrl(),
+        'no_user'         => $this->getCurrentUrl(),
+        'ok_session'      => $this->getCurrentUrl(),
+        'session_version' => 3,
+      ), $params)
+    );
+  }
+
+  /**
+   * Make an API call.
+   *
+   * @param Array $params the API call parameters
+   * @return the decoded response
+   */
+  public function api(/* polymorphic */) {
+    $args = func_get_args();
+    if (is_array($args[0])) {
+      return $this->_restserver($args[0]);
+    } else {
+      return call_user_func_array(array($this, '_graph'), $args);
+    }
+  }
+
+  /**
+   * Invoke the old restserver.php endpoint.
+   *
+   * @param Array $params method call object
+   * @return the decoded response object
+   * @throws FacebookApiException
+   */
+  private function _restserver($params) {
+    // generic application level parameters
+    $params['api_key'] = $this->getAppId();
+    $params['format'] = 'json';
+
+    $result = json_decode($this->_oauthRequest(
+      $this->getUrl('api', 'restserver.php'),
+      $params
+    ), true);
+
+    // results are returned, errors are thrown
+    if (isset($result['error_code'])) {
+      if (in_array($result['error_code'], self::$SESSION_INVALID_ERRORS)) {
+        $this->setSession(null);
+      }
+      throw new FacebookApiException($result);
+    }
+    return $result;
+  }
+
+  /**
+   * Invoke the Graph API.
+   *
+   * @param String $path the path (required)
+   * @param String $method the http method (default 'GET')
+   * @param Array $params the query/post data
+   * @return the decoded response object
+   * @throws FacebookApiException
+   */
+  private function _graph($path, $method='GET', $params=array()) {
+    if (is_array($method) && empty($params)) {
+      $params = $method;
+      $method = 'GET';
+    }
+    $params['method'] = $method; // method override as we always do a POST
+
+    $result = json_decode($this->_oauthRequest(
+      $this->getUrl('graph', $path),
+      $params
+    ), true);
+
+    // results are returned, errors are thrown
+    if (isset($result['error'])) {
+      throw new FacebookApiException($result);
+    }
+    return $result;
+  }
+
+  /**
+   * Make a OAuth Request
+   *
+   * @param String $path the path (required)
+   * @param Array $params the query/post data
+   * @return the decoded response object
+   * @throws FacebookApiException
+   */
+  private function _oauthRequest($url, $params) {
+    if (!isset($params['access_token'])) {
+      $session = $this->getSession();
+      // either user session signed, or app signed
+      if ($session) {
+        $params['access_token'] = $session['oauth_access_token'];
+      } else {
+        // TODO (naitik) sync with abanker
+        //$params['access_token'] = $this->getAppId() .'|'. $this->getApiSecret();
+      }
+    }
+
+    // json_encode all params values that are not strings
+    foreach ($params as $key => $value) {
+      if (!is_string($value)) {
+        $params[$key] = json_encode($value);
+      }
+    }
+    return $this->makeRequest($url, $params);
+  }
+
+  /**
+   * Makes an HTTP request. This method can be overriden by subclasses if
+   * developers want to do fancier things or use something other than curl to
+   * make the request.
+   *
+   * @param String $url the URL to make the request to
+   * @param Array $params the parameters to use for the POST body
+   * @param CurlHandler $ch optional initialized curl handle
+   * @return String the response text
+   */
+  protected function makeRequest($url, $params, $ch=null) {
+    if (!$ch) {
+      $ch = curl_init();
+    }
+    curl_setopt_array($ch, array(
+      CURLOPT_URL            => $url,
+      CURLOPT_POSTFIELDS     => http_build_query($params),
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_USERAGENT      => self::USER_AGENT,
+      CURLOPT_CONNECTTIMEOUT => 10,
+      CURLOPT_TIMEOUT        => 60,
+    ));
+    $result = curl_exec($ch);
+    curl_close($ch);
+    return $result;
+  }
+
+  /**
+   * The name of the Cookie that contains the session.
+   *
+   * @return String the cookie name
+   */
+  private function getSessionCookieName() {
+    return 'fbs_' . $this->getAppId();
+  }
+
+  /**
+   * Set a JS Cookie based on the _passed in_ session. It does not use the
+   * currently stored session -- you need to explicitly pass it in.
+   *
+   * @param Array $session the session to use for setting the cookie
+   */
+  private function setCookieFromSession($session=null) {
+    if (!$this->useCookieSupport()) {
+      return;
+    }
+
+    $cookieName = $this->getSessionCookieName();
+    $value = 'deleted';
+    $expires = time() - 3600;
+    $domain = '';
+    if ($session) {
+      $value = '"' . http_build_query($session) . '"';
+      if (isset($session['base_domain'])) {
+        $domain = $session['base_domain'];
+      }
+      $expires = $session['expires'];
+    }
+
+    // if an existing cookie is not set, we dont need to delete it
+    if ($value == 'deleted' && empty($_COOKIE[$cookieName])) {
+      return;
+    }
+
+    if (headers_sent()) {
+      // disable error log if a argc is set as we are most likely running in a
+      // CLI environment
+      if (!array_key_exists('argc', $_SERVER)) {
+        error_log('Could not set cookie. Headers already sent.');
+      }
+
+    // ignore for code coverage as we will never be able to setcookie in a CLI
+    // environment
+    // @codeCoverageIgnoreStart
+    } else {
+      setcookie($cookieName, $value, $expires, '/', '.' . $domain);
+    }
+    // @codeCoverageIgnoreEnd
+  }
+
+  /**
+   * Validates a session_version=3 style session object.
+   *
+   * @param Array $session the session object
+   * @return Array the session object if it validates, null otherwise
+   */
+  private function validateSessionObject($session) {
+    // make sure some essential fields exist
+    if (is_array($session) &&
+        isset($session['uid']) &&
+        isset($session['session_key']) &&
+        isset($session['secret']) &&
+        isset($session['oauth_access_token']) &&
+        isset($session['sig'])) {
+      // validate the signature
+      $session_without_sig = $session;
+      unset($session_without_sig['sig']);
+      $expected_sig = self::generateSignature(
+        $session_without_sig,
+        $this->getApiSecret()
+      );
+      if ($session['sig'] != $expected_sig) {
+        // disable error log if a argc is set as we are most likely running in
+        // a CLI environment
+        if (!array_key_exists('argc', $_SERVER)) {
+          error_log('Got invalid session signature in cookie.');
+        }
+        $session = null;
+      }
+      // check expiry time
+    } else {
+      $session = null;
+    }
+    return $session;
+  }
+
+  /**
+   * Build the URL for given domain alias, path and parameters.
+   *
+   * @param $name String the name of the domain
+   * @param $path String optional path (without a leading slash)
+   * @param $params Array optional query parameters
+   * @return String the URL for the given parameters
+   */
+  private function getUrl($name, $path='', $params=array()) {
+    $url = self::$DOMAIN_MAP[$name];
+    if ($path) {
+      if ($path[0] === '/') {
+        $path = substr($path, 1);
+      }
+      $url .= $path;
+    }
+    if ($params) {
+      $url .= '?' . http_build_query($params);
+    }
+    return $url;
+  }
+
+  /**
+   * Returns the Current URL, stripping it of known FB parameters that should
+   * not persist.
+   *
+   * @return String the current URL
+   */
+  private function getCurrentUrl() {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on'
+      ? 'https://'
+      : 'http://';
+    $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $parts = parse_url($currentUrl);
+
+    // drop known fb params
+    $query = '';
+    if (!empty($parts['query'])) {
+      $params = array();
+      parse_str($parts['query'], $params);
+      foreach(self::$DROP_QUERY_PARAMS as $key) {
+        unset($params[$key]);
+      }
+      if (!empty($params)) {
+        $query = '?' . http_build_query($params);
+      }
+    }
+
+    // rebuild
+    return $protocol . $parts['host'] . $parts['path'] . $query;
+  }
+
+  /**
+   * Generate a signature for the given params and secret.
+   *
+   * @param Array $params the parameters to sign
+   * @param String $secret the secret to sign with
+   * @return String the generated signature
+   */
+  private static function generateSignature($params, $secret) {
+    // work with sorted data
+    ksort($params);
+
+    // generate the base string
+    $base_string = '';
+    foreach($params as $key => $value) {
+      $base_string .= $key . '=' . $value;
+    }
+    $base_string .= $secret;
+
+    return md5($base_string);
+  }
+}
