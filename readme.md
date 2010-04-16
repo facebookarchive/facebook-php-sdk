@@ -1,24 +1,12 @@
-Facebook Connect PHP SDK
-========================
+Facebook PHP SDK
+================
 
-Facebook [Connect][Connect] is a set of APIs that make your application more
-social. With it you gain access to:
-
-1. Identity: the user's name, photo and more [User][FQL_User].
-2. The Graph: the user's friends and connections
-   [Connection][FQL_Connection].
-3. Distribution: the Stream, and the ability to communicate
-   [Publishing][Publishing].
-4. Integration: publishers, canvas pages, profile tabs.
-
-
-[Connect]: http://developers.facebook.com/connect "Facebook | Connect"
-[FQL_User]: http://wiki.developers.facebook.com/index.php/User_(FQL) "FQL User Table"
-[FQL_Connection]: http://wiki.developers.facebook.com/index.php/Connection_(FQL) "FQL Connection Table"
-[Publishing]: http://wiki.developers.facebook.com/index.php/Stream.publish "Stream Publishing"
+The [Facebook Platform](http://developers.facebook.com/) is
+a set of APIs that make your application more social. Read more about
+[integrating Facebook with your web site](http://developers.facebook.com/docs/guides/web) on the Facebook developer site.
 
 This repository contains the open source PHP SDK that allows you to utilize the
-above on your website. Except as otherwise noted, the Facebook Connect PHP SDK
+above on your website. Except as otherwise noted, the Facebook PHP SDK
 is licensed under the Apache Licence, Version 2.0
 (http://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -86,8 +74,7 @@ feedback. File bugs or other issues [here][issues].
 Tests
 -----
 
-We are working hard to ensure your experience using Connect is stable. In order
-to keep us nimble and allow us to bring you new functionality, without
+In order to keep us nimble and allow us to bring you new functionality, without
 compromising on stability, we have ensured full test coverage of the new SDK.
 We are including this in the open source repository to assure you of our
 commitment to quality, but also with the hopes that you will contribute back to
