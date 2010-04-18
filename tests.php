@@ -11,13 +11,13 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   const SECRET = 'fa16a3b5c96463dff7ef78d783b3025a';
 
   private static $VALID_EXPIRED_SESSION = array(
-    'base_domain'        => 'fbrell.com',
-    'expires'            => '1270728000',
-    'oauth_access_token' => '184484190795|2.63Yi6cIYcCLRKRYU20qKlA__.3600.1270728000-1677846385|EQucL4JEdBlzHDSbUJ_7A6DAAQ4.',
-    'secret'             => '63Yi6cIYcCLRKRYU20qKlA__',
-    'session_key'        => '2.63Yi6cIYcCLRKRYU20qKlA__.3600.1270728000-1677846385',
-    'sig'                => '66af909a5b2dd2d9c1f17d949aa36bfb',
-    'uid'                => '1677846385',
+    'base_domain' => 'fbrell.com',
+    'expires'     => '1271628000',
+    'oauth_token' => '184484190795|2.8WTIC_jTurG6F_bwqx5aZg__.3600.1271628000-1677846385|EFUtgEbKbfhE-M3pJ2F-P-JeBSk.',
+    'secret'      => '8WTIC_jTurG6F_bwqx5aZg__',
+    'session_key' => '2.8WTIC_jTurG6F_bwqx5aZg__.3600.1271628000-1677846385',
+    'sig'         => '8d3829586657b510770e4a4f532414ea',
+    'uid'         => '1677846385',
   );
 
   public function testConstructor() {
@@ -298,7 +298,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       $this->fail('Should not get here.');
     } catch(FacebookApiException $e) {
       // ProfileDelete means the server understood the DELETE
-      $msg = 'Exception: Unsupported delete request.';
+      $msg = 'GraphMethodException: Unsupported delete request.';
       $this->assertEquals((string) $e, $msg,
                           'Expect the invalid session message.');
     }
