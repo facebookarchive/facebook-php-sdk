@@ -418,14 +418,14 @@ class Facebook
    * @throws FacebookApiException
    */
   private function _oauthRequest($url, $params) {
-    if (!isset($params['access_token'])) {
+    if (!isset($params['oauth_token'])) {
       $session = $this->getSession();
       // either user session signed, or app signed
       if ($session) {
-        $params['access_token'] = $session['oauth_access_token'];
+        $params['oauth_token'] = $session['oauth_token'];
       } else {
         // TODO (naitik) sync with abanker
-        //$params['access_token'] = $this->getAppId() .'|'. $this->getApiSecret();
+        //$params['oauth_token'] = $this->getAppId() .'|'. $this->getApiSecret();
       }
     }
 
@@ -530,7 +530,7 @@ class Facebook
         isset($session['uid']) &&
         isset($session['session_key']) &&
         isset($session['secret']) &&
-        isset($session['oauth_access_token']) &&
+        isset($session['oauth_token']) &&
         isset($session['sig'])) {
       // validate the signature
       $session_without_sig = $session;
