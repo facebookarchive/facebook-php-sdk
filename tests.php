@@ -11,13 +11,13 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   const SECRET = 'fa16a3b5c96463dff7ef78d783b3025a';
 
   private static $VALID_EXPIRED_SESSION = array(
-    'base_domain' => 'fbrell.com',
-    'expires'     => '1271628000',
-    'oauth_token' => '184484190795|2.8WTIC_jTurG6F_bwqx5aZg__.3600.1271628000-1677846385|EFUtgEbKbfhE-M3pJ2F-P-JeBSk.',
-    'secret'      => '8WTIC_jTurG6F_bwqx5aZg__',
-    'session_key' => '2.8WTIC_jTurG6F_bwqx5aZg__.3600.1271628000-1677846385',
-    'sig'         => '8d3829586657b510770e4a4f532414ea',
-    'uid'         => '1677846385',
+    'access_token' => '184484190795|2.URXMZJ2ScvREgjIWZDJw0w__.3600.1271761200-1677846385|Lh0GtsvNWbI4IyPXY3Fl6edU15k.',
+    'base_domain'  => 'fbrell.com',
+    'expires'      => '1271761200',
+    'secret'       => 'URXMZJ2ScvREgjIWZDJw0w__',
+    'session_key'  => '2.URXMZJ2ScvREgjIWZDJw0w__.3600.1271761200-1677846385',
+    'sig'          => '9fcbec631f4be7086f208990e145d06d',
+    'uid'          => '1677846385',
   );
 
   public function testConstructor() {

@@ -100,9 +100,10 @@ class Facebook
    * Maps aliases to Facebook domains.
    */
   public static $DOMAIN_MAP = array(
-    'api'   => 'https://api.facebook.com/',
-    'graph' => 'https://graph.facebook.com/',
-    'www'   => 'https://www.facebook.com/',
+    'api'      => 'https://api.facebook.com/',
+    'api_read' => 'https://api-read.facebook.com/',
+    'graph'    => 'https://graph.facebook.com/',
+    'www'      => 'https://www.facebook.com/',
   );
 
   /**
@@ -367,7 +368,7 @@ class Facebook
     $params['format'] = 'json';
 
     $result = json_decode($this->_oauthRequest(
-      $this->getUrl('api', 'restserver.php'),
+      $this->getApiUrl($params['method']),
       $params
     ), true);
 
@@ -418,14 +419,14 @@ class Facebook
    * @throws FacebookApiException
    */
   private function _oauthRequest($url, $params) {
-    if (!isset($params['oauth_token'])) {
+    if (!isset($params['access_token'])) {
       $session = $this->getSession();
       // either user session signed, or app signed
       if ($session) {
-        $params['oauth_token'] = $session['oauth_token'];
+        $params['access_token'] = $session['access_token'];
       } else {
         // TODO (naitik) sync with abanker
-        //$params['oauth_token'] = $this->getAppId() .'|'. $this->getApiSecret();
+        //$params['access_token'] = $this->getAppId() .'|'. $this->getApiSecret();
       }
     }
 
@@ -530,7 +531,7 @@ class Facebook
         isset($session['uid']) &&
         isset($session['session_key']) &&
         isset($session['secret']) &&
-        isset($session['oauth_token']) &&
+        isset($session['access_token']) &&
         isset($session['sig'])) {
       // validate the signature
       $session_without_sig = $session;
@@ -552,6 +553,81 @@ class Facebook
       $session = null;
     }
     return $session;
+  }
+
+  /**
+   * Build the URL for api given parameters.
+   *
+   * @param $method String the method name.
+   * @return String the URL for the given parameters
+   */
+  private function getApiUrl($method) {
+    static $READ_ONLY_CALLS =
+      array('admin.getallocation' => 1,
+            'admin.getappproperties' => 1,
+            'admin.getbannedusers' => 1,
+            'admin.getlivestreamvialink' => 1,
+            'admin.getmetrics' => 1,
+            'admin.getrestrictioninfo' => 1,
+            'application.getpublicinfo' => 1,
+            'auth.getapppublickey' => 1,
+            'auth.getsession' => 1,
+            'auth.getsignedpublicsessiondata' => 1,
+            'comments.get' => 1,
+            'connect.getunconnectedfriendscount' => 1,
+            'dashboard.getactivity' => 1,
+            'dashboard.getcount' => 1,
+            'dashboard.getglobalnews' => 1,
+            'dashboard.getnews' => 1,
+            'dashboard.multigetcount' => 1,
+            'dashboard.multigetnews' => 1,
+            'data.getcookies' => 1,
+            'events.get' => 1,
+            'events.getmembers' => 1,
+            'fbml.getcustomtags' => 1,
+            'feed.getappfriendstories' => 1,
+            'feed.getregisteredtemplatebundlebyid' => 1,
+            'feed.getregisteredtemplatebundles' => 1,
+            'fql.multiquery' => 1,
+            'fql.query' => 1,
+            'friends.arefriends' => 1,
+            'friends.get' => 1,
+            'friends.getappusers' => 1,
+            'friends.getlists' => 1,
+            'friends.getmutualfriends' => 1,
+            'gifts.get' => 1,
+            'groups.get' => 1,
+            'groups.getmembers' => 1,
+            'intl.gettranslations' => 1,
+            'links.get' => 1,
+            'notes.get' => 1,
+            'notifications.get' => 1,
+            'pages.getinfo' => 1,
+            'pages.isadmin' => 1,
+            'pages.isappadded' => 1,
+            'pages.isfan' => 1,
+            'permissions.checkavailableapiaccess' => 1,
+            'permissions.checkgrantedapiaccess' => 1,
+            'photos.get' => 1,
+            'photos.getalbums' => 1,
+            'photos.gettags' => 1,
+            'profile.getinfo' => 1,
+            'profile.getinfooptions' => 1,
+            'stream.get' => 1,
+            'stream.getcomments' => 1,
+            'stream.getfilters' => 1,
+            'users.getinfo' => 1,
+            'users.getloggedinuser' => 1,
+            'users.getstandardinfo' => 1,
+            'users.hasapppermission' => 1,
+            'users.isappuser' => 1,
+            'users.isverified' => 1,
+            'video.getuploadlimits' => 1);
+    $name = 'api';
+    if (isset($READ_ONLY_CALLS[strtolower($method)])) {
+      $name = 'api_read';
+    }
+    return self::getUrl($name, 'restserver.php');
   }
 
   /**
