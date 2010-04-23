@@ -684,7 +684,11 @@ class Facebook
     }
 
     // rebuild
-    return $protocol . $parts['host'] . $parts['path'] . $query;
+    return $protocol
+        . $parts['host']
+        . (((int)$parts['port'] != 80) ? ':' . $parts['port'] : '')
+        . $parts['path']
+        . $query;
   }
 
   /**
