@@ -683,12 +683,15 @@ class Facebook
       }
     }
 
+    // use port if non default
+    $port =
+      isset($parts['port']) &&
+      (($protocol === 'http://' && $parts['port'] !== 80) ||
+       ($protocol === 'https://' && $parts['port'] !== 443))
+      ? ':' . $parts['port'] : '';
+
     // rebuild
-    return $protocol
-        . $parts['host']
-        . (((int)$parts['port'] != 80) ? ':' . $parts['port'] : '')
-        . $parts['path']
-        . $query;
+    return $protocol . $parts['host'] . $port . $parts['path'] . $query;
   }
 
   /**
