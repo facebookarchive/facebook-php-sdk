@@ -526,4 +526,13 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     unset($_COOKIE[$cookieName]);
     ini_set('arg_separator.output', '&');
   }
+
+  public function testDefaultBaseDomain() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'domain' => 'fbrell.com',
+    ));
+    $this->assertEquals($facebook->getBaseDomain(), 'fbrell.com');
+  }
 }

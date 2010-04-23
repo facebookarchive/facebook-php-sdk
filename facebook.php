@@ -132,12 +132,18 @@ class Facebook
   private $cookieSupport = false;
 
   /**
+   * Base domain for the Cookie.
+   */
+  private $baseDomain = '';
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
    * - appId: the application API key
    * - secret: the application secret
    * - cookie: (optional) boolean true to enable cookie support
+   * - domain: (optional) domain for the cookie
    *
    * @param Array $config the application configuration
    */
@@ -146,6 +152,9 @@ class Facebook
     $this->setApiSecret($config['secret']);
     if (isset($config['cookie'])) {
       $this->setCookieSupport($config['cookie']);
+    }
+    if (isset($config['domain'])) {
+      $this->setBaseDomain($config['domain']);
     }
   }
 
@@ -204,6 +213,25 @@ class Facebook
    */
   public function useCookieSupport() {
     return $this->cookieSupport;
+  }
+
+  /**
+   * Set the base domain for the Cookie.
+   *
+   * @param String $domain the base domain
+   */
+  public function setBaseDomain($domain) {
+    $this->baseDomain = $domain;
+    return $this;
+  }
+
+  /**
+   * Get the base domain for the Cookie.
+   *
+   * @return String the base domain
+   */
+  public function getBaseDomain() {
+    return $this->baseDomain;
   }
 
   /**
@@ -499,7 +527,7 @@ class Facebook
     $cookieName = $this->getSessionCookieName();
     $value = 'deleted';
     $expires = time() - 3600;
-    $domain = '';
+    $domain = $this->getBaseDomain();
     if ($session) {
       $value = '"' . http_build_query($session, null, '&') . '"';
       if (isset($session['base_domain'])) {
