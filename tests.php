@@ -485,4 +485,20 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     unset($_SERVER['REQUEST_URI']);
     unset($_SERVER['HTTPS']);
   }
+
+  public function testSecureCurrentUrlWithNonDefaultPort() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com:8080';
+    $_SERVER['REQUEST_URI'] = '/examples';
+    $_SERVER['HTTPS'] = 'on';
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $encodedUrl = rawurlencode('https://fbrell.com:8080/examples');
+    $this->assertNotNull(strpos($facebook->getLoginUrl(), $encodedUrl),
+                         'Expect the current url to exist.');
+    unset($_SERVER['HTTP_HOST']);
+    unset($_SERVER['REQUEST_URI']);
+    unset($_SERVER['HTTPS']);
+  }
 }

@@ -511,9 +511,11 @@ class Facebook
     if (headers_sent()) {
       // disable error log if a argc is set as we are most likely running in a
       // CLI environment
+      // @codeCoverageIgnoreStart
       if (!array_key_exists('argc', $_SERVER)) {
         error_log('Could not set cookie. Headers already sent.');
       }
+      // @codeCoverageIgnoreEnd
 
     // ignore for code coverage as we will never be able to setcookie in a CLI
     // environment
@@ -548,9 +550,11 @@ class Facebook
       if ($session['sig'] != $expected_sig) {
         // disable error log if a argc is set as we are most likely running in
         // a CLI environment
+        // @codeCoverageIgnoreStart
         if (!array_key_exists('argc', $_SERVER)) {
           error_log('Got invalid session signature in cookie.');
         }
+        // @codeCoverageIgnoreEnd
         $session = null;
       }
       // check expiry time
