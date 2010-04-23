@@ -1,5 +1,7 @@
 <?php
 
+require './facebook.php';
+
 /**
  * @owner naitik
  * @emails naitik@facebook.com, platform-tests@lists.facebook.com
@@ -419,5 +421,38 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                          'Expect the custom url to exist.');
     unset($_SERVER['HTTP_HOST']);
     unset($_SERVER['REQUEST_URI']);
+  }
+
+  public function testMagicQuotesQueryString() {
+    // @style-override allow json_encode call
+    $_GET['session'] = addslashes(json_encode(self::$VALID_EXPIRED_SESSION));
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertEquals($facebook->getUser(), '1677846385',
+                        'Expect uid back.');
+    unset($_GET['session']);
+  }
+
+  public function testMagicQuotesCookie() {
+    $cookieName = 'fbs_' . self::APP_ID;
+    $session = self::$VALID_EXPIRED_SESSION;
+    $_COOKIE[$cookieName] = addslashes('"' . http_build_query($session) . '"');
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'cookie' => true,
+    ));
+
+    // since we're serializing and deserializing the array, we cannot rely on
+    // positions being the same, so we do a ksort before comparison
+    $loaded_session = $facebook->getSession();
+    ksort($loaded_session);
+    ksort($session);
+    $this->assertEquals($loaded_session, $session,
+                        'Expect session back.');
+    unset($_COOKIE[$cookieName]);
   }
 }
