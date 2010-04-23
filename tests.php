@@ -501,4 +501,29 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     unset($_SERVER['REQUEST_URI']);
     unset($_SERVER['HTTPS']);
   }
+
+  public function testIgnoreArgSeparatorForCookie() {
+    $cookieName = 'fbs_' . self::APP_ID;
+    $session = self::$VALID_EXPIRED_SESSION;
+    $_COOKIE[$cookieName] = addslashes('"' . http_build_query($session) . '"');
+    ini_set('arg_separator.output', '&amp;');
+    // ensure we're testing what we expect
+    $this->assertEquals(http_build_query(array('a' => 1, 'b' => 2)),
+                        'a=1&amp;b=2');
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'cookie' => true,
+    ));
+
+    // since we're serializing and deserializing the array, we cannot rely on
+    // positions being the same, so we do a ksort before comparison
+    $loaded_session = $facebook->getSession();
+    ksort($loaded_session);
+    ksort($session);
+    $this->assertEquals($loaded_session, $session,
+                        'Expect session back.');
+    unset($_COOKIE[$cookieName]);
+    ini_set('arg_separator.output', '&');
+  }
 }

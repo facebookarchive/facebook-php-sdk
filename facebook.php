@@ -460,7 +460,7 @@ class Facebook
     }
     curl_setopt_array($ch, array(
       CURLOPT_URL            => $url,
-      CURLOPT_POSTFIELDS     => http_build_query($params),
+      CURLOPT_POSTFIELDS     => http_build_query($params, null, '&'),
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_USERAGENT      => self::USER_AGENT,
       CURLOPT_CONNECTTIMEOUT => 10,
@@ -496,7 +496,7 @@ class Facebook
     $expires = time() - 3600;
     $domain = '';
     if ($session) {
-      $value = '"' . http_build_query($session) . '"';
+      $value = '"' . http_build_query($session, null, '&') . '"';
       if (isset($session['base_domain'])) {
         $domain = $session['base_domain'];
       }
