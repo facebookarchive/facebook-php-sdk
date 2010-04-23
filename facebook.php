@@ -245,7 +245,12 @@ class Facebook
         $cookieName = $this->getSessionCookieName();
         if (isset($_COOKIE[$cookieName])) {
           $session = array();
-          parse_str(trim($_COOKIE[$cookieName], '\\"'), $session);
+          parse_str(trim(
+            get_magic_quotes_gpc()
+              ? stripslashes($_COOKIE[$cookieName])
+              : $_COOKIE[$cookieName],
+            '"'
+          ), $session);
           $session = $this->validateSessionObject($session);
         }
       }
