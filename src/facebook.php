@@ -567,7 +567,7 @@ class Facebook
    * @param Array $session the session object
    * @return Array the session object if it validates, null otherwise
    */
-  private function validateSessionObject($session) {
+  protected function validateSessionObject($session) {
     // make sure some essential fields exist
     if (is_array($session) &&
         isset($session['uid']) &&
