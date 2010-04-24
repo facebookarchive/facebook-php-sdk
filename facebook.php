@@ -77,15 +77,20 @@ class FacebookApiException extends Exception
 class Facebook
 {
   /**
-   * The User-Agent when making API calls.
-   */
-  const USER_AGENT = 'facebook-php-2.0';
-
-  /**
    * List of error codes that trigger clearing of the session.
    */
   private static $SESSION_INVALID_ERRORS = array(
     190, // Invalid OAuth Access Token
+  );
+
+  /**
+   * Default options for curl.
+   */
+  public static $CURL_OPTS = array(
+    CURLOPT_CONNECTTIMEOUT => 10,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_TIMEOUT        => 60,
+    CURLOPT_USERAGENT      => 'facebook-php-2.0',
   );
 
   /**
@@ -491,14 +496,11 @@ class Facebook
     if (!$ch) {
       $ch = curl_init();
     }
-    curl_setopt_array($ch, array(
-      CURLOPT_URL            => $url,
-      CURLOPT_POSTFIELDS     => http_build_query($params, null, '&'),
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_USERAGENT      => self::USER_AGENT,
-      CURLOPT_CONNECTTIMEOUT => 10,
-      CURLOPT_TIMEOUT        => 60,
-    ));
+
+    $opts = self::$CURL_OPTS;
+    $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
+    $opts[CURLOPT_URL] = $url;
+    curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
     curl_close($ch);
     return $result;
