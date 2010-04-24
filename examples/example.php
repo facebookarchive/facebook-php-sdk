@@ -1,6 +1,6 @@
 <?php
 
-require './facebook.php';
+require '../src/facebook.php';
 
 // Create our Application instance.
 $facebook = new Facebook(array(

@@ -1,6 +1,6 @@
 <?php
 
-require './facebook.php';
+require 'facebook.php';
 
 /**
  * @owner naitik
@@ -424,6 +424,12 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   }
 
   public function testMagicQuotesQueryString() {
+    if (!get_magic_quotes_gpc()) {
+      // this test cannot run without get_magic_quotes_gpc(), and the setting
+      // cannot be modified at runtime, so we're shit out of luck. thanks php.
+      return;
+    }
+
     // @style-override allow json_encode call
     $_GET['session'] = addslashes(json_encode(self::$VALID_EXPIRED_SESSION));
     $facebook = new Facebook(array(
@@ -437,6 +443,12 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   }
 
   public function testMagicQuotesCookie() {
+    if (!get_magic_quotes_gpc()) {
+      // this test cannot run without get_magic_quotes_gpc(), and the setting
+      // cannot be modified at runtime, so we're shit out of luck. thanks php.
+      return;
+    }
+
     $cookieName = 'fbs_' . self::APP_ID;
     $session = self::$VALID_EXPIRED_SESSION;
     $_COOKIE[$cookieName] = addslashes('"' . http_build_query($session) . '"');
@@ -505,7 +517,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   public function testIgnoreArgSeparatorForCookie() {
     $cookieName = 'fbs_' . self::APP_ID;
     $session = self::$VALID_EXPIRED_SESSION;
-    $_COOKIE[$cookieName] = addslashes('"' . http_build_query($session) . '"');
+    $_COOKIE[$cookieName] = '"' . http_build_query($session) . '"';
     ini_set('arg_separator.output', '&amp;');
     // ensure we're testing what we expect
     $this->assertEquals(http_build_query(array('a' => 1, 'b' => 2)),
