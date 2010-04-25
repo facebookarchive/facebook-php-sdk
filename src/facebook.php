@@ -77,13 +77,6 @@ class FacebookApiException extends Exception
 class Facebook
 {
   /**
-   * List of error codes that trigger clearing of the session.
-   */
-  private static $SESSION_INVALID_ERRORS = array(
-    190, // Invalid OAuth Access Token
-  );
-
-  /**
    * Default options for curl.
    */
   public static $CURL_OPTS = array(
@@ -417,9 +410,6 @@ class Facebook
 
     // results are returned, errors are thrown
     if (isset($result['error_code'])) {
-      if (in_array($result['error_code'], self::$SESSION_INVALID_ERRORS)) {
-        $this->setSession(null);
-      }
       throw new FacebookApiException($result);
     }
     return $result;
@@ -448,7 +438,11 @@ class Facebook
 
     // results are returned, errors are thrown
     if (isset($result['error'])) {
-      throw new FacebookApiException($result);
+      $e = new FacebookApiException($result);
+      if ($e->getType() === 'OAuthException') {
+        $this->setSession(null);
+      }
+      throw $e;
     }
     return $result;
   }

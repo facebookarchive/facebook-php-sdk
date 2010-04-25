@@ -286,6 +286,9 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       $msg = 'OAuthException: Error processing access token.';
       $this->assertEquals((string) $e, $msg,
                           'Expect the invalid session message.');
+      // also ensure the session was reset since it was invalid
+      $this->assertEquals($facebook->getSession(), null,
+                          'Expect the to be reset.');
     }
   }
 
