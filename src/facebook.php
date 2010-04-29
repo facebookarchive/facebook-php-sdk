@@ -17,7 +17,7 @@ class FacebookApiException extends Exception
   /**
    * The result from the API server that represents the exception information.
    */
-  private $result;
+  protected $result;
 
   /**
    * Make a new API Exception with the given result.
@@ -90,7 +90,7 @@ class Facebook
    * List of query parameters that get automatically dropped when rebuilding
    * the current URL.
    */
-  private static $DROP_QUERY_PARAMS = array(
+  protected static $DROP_QUERY_PARAMS = array(
     'session',
   );
 
@@ -107,32 +107,32 @@ class Facebook
   /**
    * The Application ID.
    */
-  private $appId;
+  protected $appId;
 
   /**
    * The Application API Secret.
    */
-  private $apiSecret;
+  protected $apiSecret;
 
   /**
    * The active user session, if one is available.
    */
-  private $session;
+  protected $session;
 
   /**
    * Indicates that we already loaded the session as best as we could.
    */
-  private $sessionLoaded = false;
+  protected $sessionLoaded = false;
 
   /**
    * Indicates if Cookie support should be enabled.
    */
-  private $cookieSupport = false;
+  protected $cookieSupport = false;
 
   /**
    * Base domain for the Cookie.
    */
-  private $baseDomain = '';
+  protected $baseDomain = '';
 
   /**
    * Initialize a Facebook Application.
@@ -398,7 +398,7 @@ class Facebook
    * @return the decoded response object
    * @throws FacebookApiException
    */
-  private function _restserver($params) {
+  protected function _restserver($params) {
     // generic application level parameters
     $params['api_key'] = $this->getAppId();
     $params['format'] = 'json';
@@ -424,7 +424,7 @@ class Facebook
    * @return the decoded response object
    * @throws FacebookApiException
    */
-  private function _graph($path, $method='GET', $params=array()) {
+  protected function _graph($path, $method='GET', $params=array()) {
     if (is_array($method) && empty($params)) {
       $params = $method;
       $method = 'GET';
@@ -455,7 +455,7 @@ class Facebook
    * @return the decoded response object
    * @throws FacebookApiException
    */
-  private function _oauthRequest($url, $params) {
+  protected function _oauthRequest($url, $params) {
     if (!isset($params['access_token'])) {
       $session = $this->getSession();
       // either user session signed, or app signed
@@ -505,7 +505,7 @@ class Facebook
    *
    * @return String the cookie name
    */
-  private function getSessionCookieName() {
+  protected function getSessionCookieName() {
     return 'fbs_' . $this->getAppId();
   }
 
@@ -515,7 +515,7 @@ class Facebook
    *
    * @param Array $session the session to use for setting the cookie
    */
-  private function setCookieFromSession($session=null) {
+  protected function setCookieFromSession($session=null) {
     if (!$this->useCookieSupport()) {
       return;
     }
@@ -599,7 +599,7 @@ class Facebook
    * @param $method String the method name.
    * @return String the URL for the given parameters
    */
-  private function getApiUrl($method) {
+  protected function getApiUrl($method) {
     static $READ_ONLY_CALLS =
       array('admin.getallocation' => 1,
             'admin.getappproperties' => 1,
@@ -676,7 +676,7 @@ class Facebook
    * @param $params Array optional query parameters
    * @return String the URL for the given parameters
    */
-  private function getUrl($name, $path='', $params=array()) {
+  protected function getUrl($name, $path='', $params=array()) {
     $url = self::$DOMAIN_MAP[$name];
     if ($path) {
       if ($path[0] === '/') {
@@ -696,7 +696,7 @@ class Facebook
    *
    * @return String the current URL
    */
-  private function getCurrentUrl() {
+  protected function getCurrentUrl() {
     $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on'
       ? 'https://'
       : 'http://';
@@ -734,7 +734,7 @@ class Facebook
    * @param String $secret the secret to sign with
    * @return String the generated signature
    */
-  private static function generateSignature($params, $secret) {
+  protected static function generateSignature($params, $secret) {
     // work with sorted data
     ksort($params);
 
