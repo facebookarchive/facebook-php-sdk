@@ -44,7 +44,7 @@ Logged in vs Logged out:
       echo '<a href="' . $facebook->getLoginUrl() . '">Login</a>';
     }
 
-[examples]: php-sdk/tree/master/examples/example.php
+[examples]: http://github.com/facebook/php-sdk/blob/master/examples/example.php
 [API]: http://developers.facebook.com/docs/api
 
 
