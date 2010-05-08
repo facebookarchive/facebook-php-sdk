@@ -77,6 +77,11 @@ class FacebookApiException extends Exception
 class Facebook
 {
   /**
+   * Version.
+   */
+  const VERSION = '2.0.3';
+
+  /**
    * Default options for curl.
    */
   public static $CURL_OPTS = array(
