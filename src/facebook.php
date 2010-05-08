@@ -416,7 +416,7 @@ class Facebook
     ), true);
 
     // results are returned, errors are thrown
-    if (isset($result['error_code'])) {
+    if (is_array($result) && isset($result['error_code'])) {
       throw new FacebookApiException($result);
     }
     return $result;
@@ -444,7 +444,7 @@ class Facebook
     ), true);
 
     // results are returned, errors are thrown
-    if (isset($result['error'])) {
+    if (is_array($result) && isset($result['error'])) {
       $e = new FacebookApiException($result);
       if ($e->getType() === 'OAuthException') {
         $this->setSession(null);
