@@ -538,10 +538,9 @@ class Facebook
     }
 
     if (headers_sent()) {
-      // disable error log if a argc is set as we are most likely running in a
-      // CLI environment
+      // disable error log if we are running in a CLI environment
       // @codeCoverageIgnoreStart
-      if (!array_key_exists('argc', $_SERVER)) {
+      if (php_sapi_name() != 'cli') {
         error_log('Could not set cookie. Headers already sent.');
       }
       // @codeCoverageIgnoreEnd
@@ -577,10 +576,9 @@ class Facebook
         $this->getApiSecret()
       );
       if ($session['sig'] != $expected_sig) {
-        // disable error log if a argc is set as we are most likely running in
-        // a CLI environment
+        // disable error log if we are running in a CLI environment
         // @codeCoverageIgnoreStart
-        if (!array_key_exists('argc', $_SERVER)) {
+        if (php_sapi_name() != 'cli') {
           error_log('Got invalid session signature in cookie.');
         }
         // @codeCoverageIgnoreEnd
