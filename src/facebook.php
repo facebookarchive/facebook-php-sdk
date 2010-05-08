@@ -236,12 +236,16 @@ class Facebook
    * Set the Session.
    *
    * @param Array $session the session
+   * @param Boolean $write_cookie indicate if a cookie should be written. this
+   * value is ignored if cookie support has been disabled.
    */
-  public function setSession($session=null) {
+  public function setSession($session=null, $write_cookie=true) {
     $session = $this->validateSessionObject($session);
     $this->sessionLoaded = true;
     $this->session = $session;
-    $this->setCookieFromSession($session);
+    if ($write_cookie) {
+      $this->setCookieFromSession($session);
+    }
     return $this;
   }
 
@@ -254,6 +258,7 @@ class Facebook
   public function getSession() {
     if (!$this->sessionLoaded) {
       $session = null;
+      $write_cookie = true;
 
       // try loading session from $_GET
       if (isset($_GET['session'])) {
@@ -278,10 +283,12 @@ class Facebook
             '"'
           ), $session);
           $session = $this->validateSessionObject($session);
+          // write only if we need to delete a invalid session cookie
+          $write_cookie = empty($session);
         }
       }
 
-      $this->setSession($session);
+      $this->setSession($session, $write_cookie);
     }
 
     return $this->session;
