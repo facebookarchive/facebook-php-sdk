@@ -4,8 +4,8 @@ require '../src/facebook.php';
 
 // Create our Application instance.
 $facebook = new Facebook(array(
-  'appId'  => '184484190795',
-  'secret' => 'fa16a3b5c96463dff7ef78d783b3025a',
+  'appId'  => '254752073152',
+  'secret' => '904270b68a2cc3d54485323652da4d14',
   'cookie' => true,
 ));
 
@@ -58,7 +58,7 @@ $naitik = $facebook->api('/naitik');
     </style>
   </head>
   <body>
-    <h1><a href="">php-sdk</a></h1>
+    <h1><a href="example.php">php-sdk</a></h1>
 
     <?php if ($me): ?>
     <a href="<?php echo $logoutUrl; ?>">
@@ -80,7 +80,7 @@ $naitik = $facebook->api('/naitik');
 
     <h3>Your User Object</h3>
     <pre><?php print_r($me); ?></pre>
-<?php else: ?>
+    <?php else: ?>
     <strong><em>You are not Connected.</em></strong>
     <?php endif ?>
 

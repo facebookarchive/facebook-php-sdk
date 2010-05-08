@@ -9,16 +9,15 @@ require 'facebook.php';
 
 class FacebookTest extends PHPUnit_Framework_TestCase
 {
-  const APP_ID = '184484190795';
-  const SECRET = 'fa16a3b5c96463dff7ef78d783b3025a';
+  const APP_ID = '254752073152';
+  const SECRET = '904270b68a2cc3d54485323652da4d14';
 
   private static $VALID_EXPIRED_SESSION = array(
-    'access_token' => '184484190795|2.URXMZJ2ScvREgjIWZDJw0w__.3600.1271761200-1677846385|Lh0GtsvNWbI4IyPXY3Fl6edU15k.',
-    'base_domain'  => 'fbrell.com',
-    'expires'      => '1271761200',
-    'secret'       => 'URXMZJ2ScvREgjIWZDJw0w__',
-    'session_key'  => '2.URXMZJ2ScvREgjIWZDJw0w__.3600.1271761200-1677846385',
-    'sig'          => '9fcbec631f4be7086f208990e145d06d',
+    'access_token' => '254752073152|2.I_eTFkcTKSzX5no3jI4r1Q__.3600.1273359600-1677846385|uI7GwrmBUed8seZZ05JbdzGFUpk.',
+    'expires'      => '1273359600',
+    'secret'       => '0d9F7pxWjM_QakY_51VZqw__',
+    'session_key'  => '2.I_eTFkcTKSzX5no3jI4r1Q__.3600.1273359600-1677846385',
+    'sig'          => '9f6ae89510b30dddb3f864f3caf32fb3',
     'uid'          => '1677846385',
   );
 
