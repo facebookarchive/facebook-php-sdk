@@ -250,26 +250,6 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     }
   }
 
-  /* reenable when oauth flow supports this
-  public function testAPIForceApplicationSecret() {
-    $facebook = new Facebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-    $facebook->setSession(self::$VALID_EXPIRED_SESSION);
-    $response = $facebook->api(array(
-      'method' => 'fql.query',
-      'query' => 'SELECT name FROM profile WHERE id=4',
-      'ss' => '0', // without this, the call would fail with an
-                   // invalid session exception
-    ));
-    $this->assertEquals(count($response), 1,
-                        'Expect one row back.');
-    $this->assertEquals($response[0]['name'], 'Mark Zuckerberg',
-                        'Expect the name back.');
-  }
-  */
-
   public function testAPIGraphPublicData() {
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
@@ -586,5 +566,15 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                         'Expect session back.');
     unset($_COOKIE[$cookieName]);
     ini_set('arg_separator.output', '&');
+  }
+
+  public function testAppSecretCall() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $response = $facebook->api('/' . self::APP_ID . '/insights');
+    $this->assertTrue(count($response['data']) > 0,
+                      'Expect some data back.');
   }
 }

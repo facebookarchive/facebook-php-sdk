@@ -474,8 +474,7 @@ class Facebook
       if ($session) {
         $params['access_token'] = $session['access_token'];
       } else {
-        // TODO (naitik) sync with abanker
-        //$params['access_token'] = $this->getAppId() .'|'. $this->getApiSecret();
+        $params['access_token'] = $this->getAppId() .'|'. $this->getApiSecret();
       }
     }
 
