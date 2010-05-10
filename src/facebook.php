@@ -265,12 +265,12 @@ class Facebook
       $session = null;
       $write_cookie = true;
 
-      // try loading session from $_GET
-      if (isset($_GET['session'])) {
+      // try loading session from $_REQUEST
+      if (isset($_REQUEST['session'])) {
         $session = json_decode(
           get_magic_quotes_gpc()
-            ? stripslashes($_GET['session'])
-            : $_GET['session'],
+            ? stripslashes($_REQUEST['session'])
+            : $_REQUEST['session'],
           true
         );
         $session = $this->validateSessionObject($session);
