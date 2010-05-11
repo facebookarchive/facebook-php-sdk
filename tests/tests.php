@@ -153,7 +153,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
 
   public function testSessionFromQueryString() {
     // @style-override allow json_encode call
-    $_GET['session'] = json_encode(self::$VALID_EXPIRED_SESSION);
+    $_REQUEST['session'] = json_encode(self::$VALID_EXPIRED_SESSION);
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
@@ -161,7 +161,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals($facebook->getUser(), '1677846385',
                         'Expect uid back.');
-    unset($_GET['session']);
+    unset($_REQUEST['session']);
   }
 
   public function testInvalidSessionFromQueryString() {
@@ -433,7 +433,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     }
 
     // @style-override allow json_encode call
-    $_GET['session'] = addslashes(json_encode(self::$VALID_EXPIRED_SESSION));
+    $_REQUEST['session'] = addslashes(json_encode(self::$VALID_EXPIRED_SESSION));
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
@@ -441,7 +441,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals($facebook->getUser(), '1677846385',
                         'Expect uid back.');
-    unset($_GET['session']);
+    unset($_REQUEST['session']);
   }
 
   public function testMagicQuotesCookie() {
