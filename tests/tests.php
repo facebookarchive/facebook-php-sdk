@@ -326,6 +326,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       Facebook::$CURL_OPTS[CURLOPT_TIMEOUT_MS] = 1;
       $facebook->api('/naitik');
     } catch(FacebookApiException $e) {
+      unset(Facebook::$CURL_OPTS[CURLOPT_TIMEOUT_MS]);
       $this->assertEquals(
         CURLE_OPERATION_TIMEOUTED, $e->getCode(), 'expect timeout');
       $this->assertEquals('CurlException', $e->getType(), 'expect type');
