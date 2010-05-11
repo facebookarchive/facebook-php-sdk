@@ -243,6 +243,10 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       $msg = 'Exception: 190: Invalid OAuth 2.0 Access Token';
       $this->assertEquals((string) $e, $msg,
                           'Expect the invalid session message.');
+
+      $result = $e->getResult();
+      $this->assertTrue(is_array($result), 'expect a result object');
+      $this->assertEquals('190', $result['error_code'], 'expect code');
     }
   }
 
@@ -475,7 +479,8 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     }
 
     // @style-override allow json_encode call
-    $_REQUEST['session'] = addslashes(json_encode(self::$VALID_EXPIRED_SESSION));
+    $_REQUEST['session'] = addslashes(
+      json_encode(self::$VALID_EXPIRED_SESSION));
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
