@@ -336,6 +336,20 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     $this->fail('Should not get here.');
   }
 
+  public function testGraphAPIWithOnlyParams() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $response = $facebook->api('/platform/feed', array('limit' => 1));
+    $this->assertEquals(1, count($response['data']), 'should get one entry');
+    $this->assertTrue(
+      strstr($response['paging']['next'], 'limit=1') !== false,
+      'expect the same limit back in the paging urls'
+    );
+  }
+
   public function testLoginURLDefaults() {
     $_SERVER['HTTP_HOST'] = 'fbrell.com';
     $_SERVER['REQUEST_URI'] = '/examples';
