@@ -1,7 +1,5 @@
 <?php
 
-require 'facebook.php';
-
 /**
  * @owner naitik
  * @emails naitik@facebook.com, platform-tests@lists.facebook.com
