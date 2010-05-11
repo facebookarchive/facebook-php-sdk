@@ -508,6 +508,17 @@ class Facebook
     $opts[CURLOPT_URL] = $url;
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
+    if ($result === false) {
+      $e = new FacebookApiException(array(
+        'error_code' => curl_errno($ch),
+        'error'      => array(
+          'message' => curl_error($ch),
+          'type'    => 'CurlException',
+        ),
+      ));
+      curl_close($ch);
+      throw $e;
+    }
     curl_close($ch);
     return $result;
   }

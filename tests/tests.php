@@ -549,4 +549,24 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     ));
     $this->assertEquals($facebook->getBaseDomain(), 'fbrell.com');
   }
+
+  public function testCurlFailure() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    try {
+      // we dont expect facebook will ever return in 1ms
+      Facebook::$CURL_OPTS[CURLOPT_TIMEOUT_MS] = 1;
+      $facebook->api('/naitik');
+    } catch(FacebookApiException $e) {
+      $this->assertEquals(
+        CURLE_OPERATION_TIMEOUTED, $e->getCode(), 'expect timeout');
+      $this->assertEquals('CurlException', $e->getType(), 'expect type');
+      return;
+    }
+
+    $this->fail('Should not get here.');
+  }
 }
