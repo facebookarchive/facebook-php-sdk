@@ -66,6 +66,15 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                         'Expect the API secret to be dummy.');
   }
 
+  public function testDefaultBaseDomain() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'domain' => 'fbrell.com',
+    ));
+    $this->assertEquals($facebook->getBaseDomain(), 'fbrell.com');
+  }
+
   public function testSetCookieSupport() {
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
@@ -306,6 +315,26 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     }
   }
 
+  public function testCurlFailure() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    try {
+      // we dont expect facebook will ever return in 1ms
+      Facebook::$CURL_OPTS[CURLOPT_TIMEOUT_MS] = 1;
+      $facebook->api('/naitik');
+    } catch(FacebookApiException $e) {
+      $this->assertEquals(
+        CURLE_OPERATION_TIMEOUTED, $e->getCode(), 'expect timeout');
+      $this->assertEquals('CurlException', $e->getType(), 'expect type');
+      return;
+    }
+
+    $this->fail('Should not get here.');
+  }
+
   public function testLoginURLDefaults() {
     $_SERVER['HTTP_HOST'] = 'fbrell.com';
     $_SERVER['REQUEST_URI'] = '/examples';
@@ -537,34 +566,5 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                         'Expect session back.');
     unset($_COOKIE[$cookieName]);
     ini_set('arg_separator.output', '&');
-  }
-
-  public function testDefaultBaseDomain() {
-    $facebook = new Facebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-      'domain' => 'fbrell.com',
-    ));
-    $this->assertEquals($facebook->getBaseDomain(), 'fbrell.com');
-  }
-
-  public function testCurlFailure() {
-    $facebook = new Facebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-
-    try {
-      // we dont expect facebook will ever return in 1ms
-      Facebook::$CURL_OPTS[CURLOPT_TIMEOUT_MS] = 1;
-      $facebook->api('/naitik');
-    } catch(FacebookApiException $e) {
-      $this->assertEquals(
-        CURLE_OPERATION_TIMEOUTED, $e->getCode(), 'expect timeout');
-      $this->assertEquals('CurlException', $e->getType(), 'expect type');
-      return;
-    }
-
-    $this->fail('Should not get here.');
   }
 }
