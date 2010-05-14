@@ -66,10 +66,11 @@ $naitik = $facebook->api('/naitik');
     <script>
       window.fbAsyncInit = function() {
         FB.init({
-          appId  : '<?php echo $facebook->getAppId(); ?>',
-          status : true, // check login status
-          cookie : true, // enable cookies to allow the server to access the session
-          xfbml  : true  // parse XFBML
+          appId   : '<?php echo $facebook->getAppId(); ?>',
+          status  : true, // check login status
+          cookie  : true, // enable cookies to allow the server to access the session
+          xfbml   : true  // parse XFBML
+          session : <?php echo json_encode($session); ?>, // don't refetch the session when PHP already has it
         });
 
         // whenever the user logs in, we refresh the page
