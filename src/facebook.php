@@ -503,7 +503,7 @@ class Facebook
     }
 
     $opts = self::$CURL_OPTS;
-    $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
+    $opts[CURLOPT_POSTFIELDS] = $params;
     $opts[CURLOPT_URL] = $url;
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
