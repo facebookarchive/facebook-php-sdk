@@ -554,6 +554,11 @@ class Facebook
       $expires = $session['expires'];
     }
 
+    // prepend dot if a domain is found
+    if ($domain) {
+      $domain = '.' . $domain;
+    }
+
     // if an existing cookie is not set, we dont need to delete it
     if ($value == 'deleted' && empty($_COOKIE[$cookieName])) {
       return;
@@ -571,7 +576,7 @@ class Facebook
     // environment
     // @codeCoverageIgnoreStart
     } else {
-      setcookie($cookieName, $value, $expires, '/', '.' . $domain);
+      setcookie($cookieName, $value, $expires, '/', $domain);
     }
     // @codeCoverageIgnoreEnd
   }
