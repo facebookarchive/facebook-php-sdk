@@ -143,7 +143,7 @@ class Facebook
    * Initialize a Facebook Application.
    *
    * The configuration:
-   * - appId: the application API key
+   * - appId: the application ID
    * - secret: the application secret
    * - cookie: (optional) boolean true to enable cookie support
    * - domain: (optional) domain for the cookie
@@ -164,7 +164,7 @@ class Facebook
   /**
    * Set the Application ID.
    *
-   * @param String $appId the API key
+   * @param String $appId the Application ID
    */
   public function setAppId($appId) {
     $this->appId = $appId;
@@ -172,9 +172,9 @@ class Facebook
   }
 
   /**
-   * Get the API Key.
+   * Get the Application ID.
    *
-   * @return String the API key
+   * @return String the Application ID
    */
   public function getAppId() {
     return $this->appId;
