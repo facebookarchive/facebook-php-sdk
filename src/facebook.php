@@ -769,6 +769,7 @@ class Facebook
    * @param String log message
    */
   protected static function error_log($msg) {
+    // disable error log if we are running in a CLI environment
     // @codeCoverageIgnoreStart
     if (php_sapi_name() != 'cli') {
       error_log($msg);
