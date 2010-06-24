@@ -565,12 +565,7 @@ class Facebook
     }
 
     if (headers_sent()) {
-      // disable error log if we are running in a CLI environment
-      // @codeCoverageIgnoreStart
-      if (php_sapi_name() != 'cli') {
-        error_log('Could not set cookie. Headers already sent.');
-      }
-      // @codeCoverageIgnoreEnd
+      self::error_log('Could not set cookie. Headers already sent.');
 
     // ignore for code coverage as we will never be able to setcookie in a CLI
     // environment
@@ -603,12 +598,7 @@ class Facebook
         $this->getApiSecret()
       );
       if ($session['sig'] != $expected_sig) {
-        // disable error log if we are running in a CLI environment
-        // @codeCoverageIgnoreStart
-        if (php_sapi_name() != 'cli') {
-          error_log('Got invalid session signature in cookie.');
-        }
-        // @codeCoverageIgnoreEnd
+        self::error_log('Got invalid session signature in cookie.');
         $session = null;
       }
       // check expiry time
@@ -771,5 +761,19 @@ class Facebook
     $base_string .= $secret;
 
     return md5($base_string);
+  }
+
+  /**
+   * Prints to the error log if you aren't in command line mode. 
+   *
+   * @param String log message
+   */
+  protected static function error_log($msg) {
+    // @codeCoverageIgnoreStart
+    if (php_sapi_name() != 'cli') {
+      error_log($msg);
+    }
+    print 'error_log: '.$msg."\n";
+    // @codeCoverageIgnoreEnd
   }
 }
