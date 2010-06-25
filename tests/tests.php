@@ -19,6 +19,9 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     'uid'          => '1677846385',
   );
 
+  private static $VALID_SIGNED_REQUEST = 'ZcZocIFknCpcTLhwsRwwH5nL6oq7OmKWJx41xRTi59E.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOiIxMjczMzU5NjAwIiwib2F1dGhfdG9rZW4iOiIyNTQ3NTIwNzMxNTJ8Mi5JX2VURmtjVEtTelg1bm8zakk0cjFRX18uMzYwMC4xMjczMzU5NjAwLTE2Nzc4NDYzODV8dUk3R3dybUJVZWQ4c2VaWjA1SmJkekdGVXBrLiIsInNlc3Npb25fa2V5IjoiMi5JX2VURmtjVEtTelg1bm8zakk0cjFRX18uMzYwMC4xMjczMzU5NjAwLTE2Nzc4NDYzODUiLCJ1c2VyX2lkIjoiMTY3Nzg0NjM4NSJ9';
+  private static $NON_TOSSED_SIGNED_REQUEST = 'laEjO-az9kzgFOUldy1G7EyaP6tMQEsbFIDrB1RUamE.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiJ9';
+
   public function testConstructor() {
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
@@ -111,6 +114,17 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                       'Expect null session back.');
   }
 
+  public function testNonUserAccessToken() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'cookie' => true,
+    ));
+    $this->assertTrue($facebook->getAccessToken() ==
+                      self::APP_ID.'|'.self::SECRET,
+                      'Expect appId|secret.');
+  }
+
   public function testSetSession() {
     $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
@@ -118,8 +132,12 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'cookie' => true,
     ));
     $facebook->setSession(self::$VALID_EXPIRED_SESSION);
-    $this->assertTrue($facebook->getUser() == '1677846385',
+    $this->assertTrue($facebook->getUser() ==
+                      self::$VALID_EXPIRED_SESSION['uid'],
                       'Expect uid back.');
+    $this->assertTrue($facebook->getAccessToken() ==
+                      self::$VALID_EXPIRED_SESSION['access_token'],
+                      'Expect access token back.');
   }
 
   public function testGetSessionFromCookie() {
@@ -166,7 +184,8 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'secret' => self::SECRET,
     ));
 
-    $this->assertEquals($facebook->getUser(), '1677846385',
+    $this->assertEquals($facebook->getUser(),
+                        self::$VALID_EXPIRED_SESSION['uid'],
                         'Expect uid back.');
     unset($_REQUEST['session']);
   }
@@ -466,7 +485,8 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'secret' => self::SECRET,
     ));
 
-    $this->assertEquals($facebook->getUser(), '1677846385',
+    $this->assertEquals($facebook->getUser(),
+                        self::$VALID_EXPIRED_SESSION['uid'],
                         'Expect uid back.');
     unset($_REQUEST['session']);
   }
@@ -576,5 +596,58 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     $response = $facebook->api('/' . self::APP_ID . '/insights');
     $this->assertTrue(count($response['data']) > 0,
                       'Expect some data back.');
+  }
+
+  public function testBase64UrlEncode() {
+    $input = 'Facebook rocks';
+    $output = 'RmFjZWJvb2sgcm9ja3M';
+
+    $this->assertEquals(FBPublic::publicBase64UrlDecode($output), $input);
+  }
+
+  public function testSignedToken() {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $payload = $facebook->publicParseSignedRequest(self::$VALID_SIGNED_REQUEST);
+    $this->assertNotNull($payload, 'Expected token to parse');
+    $session = $facebook->publicCreateSessionFromSignedRequest($payload);
+    foreach (array('uid', 'access_token') as $key) {
+      $this->assertEquals($session[$key], self::$VALID_EXPIRED_SESSION[$key]);
+    }
+    $this->assertEquals($facebook->getSignedRequest(), null);
+    $_REQUEST['signed_request'] = self::$VALID_SIGNED_REQUEST;
+    $this->assertEquals($facebook->getSignedRequest(), $payload);
+    unset($_REQUEST['signed_request']);
+  }
+
+  public function testNonTossedSignedtoken() {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $payload = $facebook->publicParseSignedRequest(
+      self::$NON_TOSSED_SIGNED_REQUEST);
+    $this->assertNotNull($payload, 'Expected token to parse');
+    $session = $facebook->publicCreateSessionFromSignedRequest($payload);
+    $this->assertNull($session);
+    $this->assertNull($facebook->getSignedRequest());
+    $_REQUEST['signed_request'] = self::$NON_TOSSED_SIGNED_REQUEST;
+    $this->assertEquals($facebook->getSignedRequest(),
+      array('algorithm' => 'HMAC-SHA256'));
+    unset($_REQUEST['signed_request']);
+  }
+}
+
+class FBPublic extends Facebook {
+  public static function publicBase64UrlDecode($input) {
+    return self::base64UrlDecode($input);
+  }
+  public function publicParseSignedRequest($intput) {
+    return $this->parseSignedRequest($intput);
+  }
+  public function publicCreateSessionFromSignedRequest($payload) {
+    return $this->createSessionFromSignedRequest($payload);
   }
 }
