@@ -774,7 +774,8 @@ class Facebook
     if (php_sapi_name() != 'cli') {
       error_log($msg);
     }
-    print 'error_log: '.$msg."\n";
+    // uncomment this if you want to see the errors on the page
+    // print 'error_log: '.$msg."\n";
     // @codeCoverageIgnoreEnd
   }
 }
