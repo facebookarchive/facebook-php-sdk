@@ -79,7 +79,7 @@ class Facebook
   /**
    * Version.
    */
-  const VERSION = '2.0.5';
+  const VERSION = '2.0.6';
 
   /**
    * Default options for curl.
