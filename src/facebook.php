@@ -505,6 +505,17 @@ class Facebook
     $opts = self::$CURL_OPTS;
     $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
     $opts[CURLOPT_URL] = $url;
+
+    // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
+    // for 2 seconds if the server does not support this header.
+    if (isset($opts[CURLOPT_HTTPHEADER])) {
+      $existing_headers = $opts[CURLOPT_HTTPHEADER];
+      $existing_headers[] = 'Expect:';
+      $opts[CURLOPT_HTTPHEADER] = $existing_headers;
+    } else {
+      $opts[CURLOPT_HTTPHEADER] = array('Expect:');
+    }
+
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
     if ($result === false) {
