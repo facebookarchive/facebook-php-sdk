@@ -711,7 +711,7 @@ class Facebook
       $url .= $path;
     }
     if ($params) {
-      $url .= '?' . http_build_query($params);
+      $url .= '?' . http_build_query($params, null, '&');
     }
     return $url;
   }
@@ -738,7 +738,7 @@ class Facebook
         unset($params[$key]);
       }
       if (!empty($params)) {
-        $query = '?' . http_build_query($params);
+        $query = '?' . http_build_query($params, null, '&');
       }
     }
 
