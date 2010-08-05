@@ -7,20 +7,20 @@
 
 class FacebookTest extends PHPUnit_Framework_TestCase
 {
-  const APP_ID = '254752073152';
-  const SECRET = '904270b68a2cc3d54485323652da4d14';
+  const APP_ID = '117743971608120';
+  const SECRET = '943716006e74d9b9283d4d5d8ab93204';
 
   private static $VALID_EXPIRED_SESSION = array(
-    'access_token' => '254752073152|2.I_eTFkcTKSzX5no3jI4r1Q__.3600.1273359600-1677846385|uI7GwrmBUed8seZZ05JbdzGFUpk.',
-    'expires'      => '1273359600',
-    'secret'       => '0d9F7pxWjM_QakY_51VZqw__',
-    'session_key'  => '2.I_eTFkcTKSzX5no3jI4r1Q__.3600.1273359600-1677846385',
-    'sig'          => '9f6ae89510b30dddb3f864f3caf32fb3',
+    'access_token' => '117743971608120|2.vdCKd4ZIEJlHwwtrkilgKQ__.86400.1281049200-1677846385|NF_2DDNxFBznj2CuwiwabHhTAHc.',
+    'expires'      => '1281049200',
+    'secret'       => 'u0QiRGAwaPCyQ7JE_hiz1w__',
+    'session_key'  => '2.vdCKd4ZIEJlHwwtrkilgKQ__.86400.1281049200-1677846385',
+    'sig'          => '7a9b063de0bef334637832166948dcad',
     'uid'          => '1677846385',
   );
 
-  private static $VALID_SIGNED_REQUEST = 'ZcZocIFknCpcTLhwsRwwH5nL6oq7OmKWJx41xRTi59E.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOiIxMjczMzU5NjAwIiwib2F1dGhfdG9rZW4iOiIyNTQ3NTIwNzMxNTJ8Mi5JX2VURmtjVEtTelg1bm8zakk0cjFRX18uMzYwMC4xMjczMzU5NjAwLTE2Nzc4NDYzODV8dUk3R3dybUJVZWQ4c2VaWjA1SmJkekdGVXBrLiIsInNlc3Npb25fa2V5IjoiMi5JX2VURmtjVEtTelg1bm8zakk0cjFRX18uMzYwMC4xMjczMzU5NjAwLTE2Nzc4NDYzODUiLCJ1c2VyX2lkIjoiMTY3Nzg0NjM4NSJ9';
-  private static $NON_TOSSED_SIGNED_REQUEST = 'laEjO-az9kzgFOUldy1G7EyaP6tMQEsbFIDrB1RUamE.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiJ9';
+  private static $VALID_SIGNED_REQUEST = '1sxR88U4SW9m6QnSxwCEw_CObqsllXhnpP5j2pxD97c.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEyODEwNTI4MDAsIm9hdXRoX3Rva2VuIjoiMTE3NzQzOTcxNjA4MTIwfDIuVlNUUWpub3hYVVNYd1RzcDB1U2g5d19fLjg2NDAwLjEyODEwNTI4MDAtMTY3Nzg0NjM4NXx4NURORHBtcy1nMUM0dUJHQVYzSVdRX2pYV0kuIiwidXNlcl9pZCI6IjE2Nzc4NDYzODUifQ';
+  private static $NON_TOSSED_SIGNED_REQUEST = 'c0Ih6vYvauDwncv0n0pndr0hP0mvZaJPQDPt6Z43O0k.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiJ9';
 
   public function testConstructor() {
     $facebook = new Facebook(array(
@@ -47,6 +47,20 @@ class FacebookTest extends PHPUnit_Framework_TestCase
                         'Expect the API secret to be set.');
     $this->assertTrue($facebook->useCookieSupport(),
                       'Expect Cookie support to be on.');
+  }
+
+  public function testConstructorWithFileUpload() {
+    $facebook = new Facebook(array(
+      'appId'      => self::APP_ID,
+      'secret'     => self::SECRET,
+      'fileUpload' => true,
+    ));
+    $this->assertEquals($facebook->getAppId(), self::APP_ID,
+                        'Expect the App ID to be set.');
+    $this->assertEquals($facebook->getApiSecret(), self::SECRET,
+                        'Expect the API secret to be set.');
+    $this->assertTrue($facebook->useFileUploadSupport(),
+                      'Expect file upload support to be on.');
   }
 
   public function testSetAppId() {
@@ -102,6 +116,18 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     $facebook->setSession(null);
     $this->assertFalse(isset($_COOKIE[$cookieName]),
                        'Expect Cookie to not exist.');
+  }
+
+  public function testSetFileUploadSupport() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertFalse($facebook->useFileUploadSupport(),
+                       'Expect file upload support to be off.');
+    $facebook->setFileUploadSupport(true);
+    $this->assertTrue($facebook->useFileUploadSupport(),
+                      'Expect file upload support to be on.');
   }
 
   public function testSetNullSession() {
@@ -345,7 +371,8 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'secret' => self::SECRET,
     ));
 
-    $response = $facebook->api('/platform/feed', array('limit' => 1));
+    $response = $facebook->api('/platform/feed',
+      array('limit' => 1, 'access_token' => ''));
     $this->assertEquals(1, count($response['data']), 'should get one entry');
     $this->assertTrue(
       strstr($response['paging']['next'], 'limit=1') !== false,
@@ -613,12 +640,20 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     $payload = $facebook->publicParseSignedRequest(self::$VALID_SIGNED_REQUEST);
     $this->assertNotNull($payload, 'Expected token to parse');
     $session = $facebook->publicCreateSessionFromSignedRequest($payload);
-    foreach (array('uid', 'access_token') as $key) {
-      $this->assertEquals($session[$key], self::$VALID_EXPIRED_SESSION[$key]);
-    }
+    $this->assertEquals($session['uid'], self::$VALID_EXPIRED_SESSION['uid']);
     $this->assertEquals($facebook->getSignedRequest(), null);
     $_REQUEST['signed_request'] = self::$VALID_SIGNED_REQUEST;
     $this->assertEquals($facebook->getSignedRequest(), $payload);
+    unset($_REQUEST['signed_request']);
+  }
+
+  public function testSignedTokenInQuery() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $_REQUEST['signed_request'] = self::$VALID_SIGNED_REQUEST;
+    $this->assertNotNull($facebook->getSession());
     unset($_REQUEST['signed_request']);
   }
 
