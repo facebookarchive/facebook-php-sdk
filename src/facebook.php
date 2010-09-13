@@ -28,8 +28,20 @@ class FacebookApiException extends Exception
     $this->result = $result;
 
     $code = isset($result['error_code']) ? $result['error_code'] : 0;
-    $msg  = isset($result['error'])
-              ? $result['error']['message'] : $result['error_msg'];
+
+    if (isset($result['error_description'])) {
+      // OAuth 2.0 Draft 10 style
+      $msg = $result['error_description'];
+    } else if (isset($result['error']) && is_array($result['error'])) {
+      // OAuth 2.0 Draft 00 style
+      $msg = $result['error']['message'];
+    } else if (isset($result['error_msg'])) {
+      // Rest server style
+      $msg = $result['error_msg'];
+    } else {
+      $msg = 'Unknown Error. Check getResult()';
+    }
+
     parent::__construct($msg, $code);
   }
 
@@ -49,10 +61,19 @@ class FacebookApiException extends Exception
    * @return String
    */
   public function getType() {
-    return
-      isset($this->result['error']) && isset($this->result['error']['type'])
-      ? $this->result['error']['type']
-      : 'Exception';
+    if (isset($this->result['error'])) {
+      $error = $this->result['error'];
+      if (is_string($error)) {
+        // OAuth 2.0 Draft 10 style
+        return $error;
+      } else if (is_array($error)) {
+        // OAuth 2.0 Draft 00 style
+        if (isset($error['type'])) {
+          return $error['type'];
+        }
+      }
+    }
+    return 'Exception';
   }
 
   /**
@@ -79,7 +100,7 @@ class Facebook
   /**
    * Version.
    */
-  const VERSION = '2.1.1';
+  const VERSION = '2.1.2';
 
   /**
    * Default options for curl.
@@ -520,8 +541,12 @@ class Facebook
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error'])) {
       $e = new FacebookApiException($result);
-      if ($e->getType() === 'OAuthException') {
-        $this->setSession(null);
+      switch ($e->getType()) {
+        // OAuth 2.0 Draft 00 style
+        case 'OAuthException':
+        // OAuth 2.0 Draft 10 style
+        case 'invalid_token':
+          $this->setSession(null);
       }
       throw $e;
     }

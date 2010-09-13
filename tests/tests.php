@@ -10,6 +10,9 @@ class FacebookTest extends PHPUnit_Framework_TestCase
   const APP_ID = '117743971608120';
   const SECRET = '943716006e74d9b9283d4d5d8ab93204';
 
+  const MIGRATED_APP_ID = '148931871805121';
+  const MIGRATED_SECRET = 'bb9b2bb536647ed3b92c1c9a8969ef7c';
+
   private static $VALID_EXPIRED_SESSION = array(
     'access_token' => '117743971608120|2.vdCKd4ZIEJlHwwtrkilgKQ__.86400.1281049200-1677846385|NF_2DDNxFBznj2CuwiwabHhTAHc.',
     'expires'      => '1281049200',
@@ -224,7 +227,6 @@ class FacebookTest extends PHPUnit_Framework_TestCase
 
     $params = array(
       'fb_sig_in_iframe' => 1,
-      'fb_sig_iframe_key' => '6512bd43d9caa6e02c990b0a82652dca',
       'fb_sig_user' => '1677846385',
       'fb_sig_session_key' =>
         '2.NdKHtYIuB0EcNSHOvqAKHg__.86400.1258092000-1677846385',
@@ -319,11 +321,11 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     } catch(FacebookApiException $e) {
       // means the server got the access token
       $msg = 'OAuthException: Error processing access token.';
-      $this->assertEquals((string) $e, $msg,
+      $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
       // also ensure the session was reset since it was invalid
       $this->assertEquals($facebook->getSession(), null,
-                          'Expect the to be reset.');
+                          'Expect the session to be reset.');
     }
   }
 
@@ -339,7 +341,48 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     } catch(FacebookApiException $e) {
       // ProfileDelete means the server understood the DELETE
       $msg = 'GraphMethodException: Unsupported delete request.';
-      $this->assertEquals((string) $e, $msg,
+      $this->assertEquals($msg, (string) $e,
+                          'Expect the invalid session message.');
+    }
+  }
+
+  public function testGraphAPIOAuthSpecError() {
+    $facebook = new Facebook(array(
+      'appId'  => self::MIGRATED_APP_ID,
+      'secret' => self::MIGRATED_SECRET,
+    ));
+
+    try {
+      $response = $facebook->api('/me', array(
+        'client_id' => self::MIGRATED_APP_ID));
+
+      $this->fail('Should not get here.');
+    } catch(FacebookApiException $e) {
+      // means the server got the access token
+      $msg = 'invalid_request: An active access token must be used '.
+             'to query information about the current user.';
+      $this->assertEquals($msg, (string) $e,
+                          'Expect the invalid session message.');
+      // also ensure the session was reset since it was invalid
+      $this->assertEquals($facebook->getSession(), null,
+                          'Expect the session to be reset.');
+    }
+  }
+
+  public function testGraphAPIMethodOAuthSpecError() {
+    $facebook = new Facebook(array(
+      'appId'  => self::MIGRATED_APP_ID,
+      'secret' => self::MIGRATED_SECRET,
+    ));
+
+    try {
+      $response = $facebook->api('/naitik', 'DELETE', array(
+        'client_id' => self::MIGRATED_APP_ID));
+      $this->fail('Should not get here.');
+    } catch(FacebookApiException $e) {
+      // ProfileDelete means the server understood the DELETE
+      $msg = 'invalid_request: Unsupported delete request.';
+      $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
     }
   }
@@ -349,6 +392,11 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
+
+    if (!defined('CURLOPT_TIMEOUT_MS')) {
+      // can't test it if we don't have millisecond timeouts
+      return;
+    }
 
     try {
       // we dont expect facebook will ever return in 1ms
@@ -371,7 +419,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'secret' => self::SECRET,
     ));
 
-    $response = $facebook->api('/platform/feed',
+    $response = $facebook->api('/331218348435/feed',
       array('limit' => 1, 'access_token' => ''));
     $this->assertEquals(1, count($response['data']), 'should get one entry');
     $this->assertTrue(
