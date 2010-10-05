@@ -320,7 +320,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       $this->fail('Should not get here.');
     } catch(FacebookApiException $e) {
       // means the server got the access token
-      $msg = 'OAuthException: Error processing access token.';
+      $msg = 'OAuthException: Error validating access token.';
       $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
       // also ensure the session was reset since it was invalid
@@ -721,6 +721,22 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       array('algorithm' => 'HMAC-SHA256'));
     unset($_REQUEST['signed_request']);
   }
+
+  public function testBundledCACert() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+      // use the bundled cert from the start
+    Facebook::$CURL_OPTS[CURLOPT_CAINFO] = dirname(__FILE__) . '/../fb_ca_chain_bundle.crt';
+    $response = $facebook->api('/naitik');
+
+    unset(Facebook::$CURL_OPTS[CURLOPT_CAINFO]);
+    $this->assertEquals(
+      $response['id'], '5526183', 'should get expected id.');
+  }
+
 }
 
 class FBPublic extends Facebook {
