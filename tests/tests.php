@@ -2,7 +2,6 @@
 
 /**
  * @owner naitik
- * @emails naitik@facebook.com, platform-tests@lists.facebook.com
  */
 
 class FacebookTest extends PHPUnit_Framework_TestCase
@@ -340,7 +339,7 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       $this->fail('Should not get here.');
     } catch(FacebookApiException $e) {
       // ProfileDelete means the server understood the DELETE
-      $msg = 'GraphMethodException: Unsupported delete request.';
+      $msg = 'OAuthException: An access token is required to request this resource.';
       $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
     }
@@ -376,12 +375,13 @@ class FacebookTest extends PHPUnit_Framework_TestCase
     ));
 
     try {
-      $response = $facebook->api('/naitik', 'DELETE', array(
+      $response = $facebook->api('/daaku.shah', 'DELETE', array(
         'client_id' => self::MIGRATED_APP_ID));
       $this->fail('Should not get here.');
     } catch(FacebookApiException $e) {
       // ProfileDelete means the server understood the DELETE
-      $msg = 'invalid_request: Unsupported delete request.';
+      $msg = 'invalid_request: Test account not associated with application: '.
+        'The test account is not associated with this application.';
       $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
     }
@@ -728,8 +728,8 @@ class FacebookTest extends PHPUnit_Framework_TestCase
       'secret' => self::SECRET,
     ));
 
-      // use the bundled cert from the start
-    Facebook::$CURL_OPTS[CURLOPT_CAINFO] = dirname(__FILE__) . '/../fb_ca_chain_bundle.crt';
+    // use the bundled cert from the start
+    Facebook::$CURL_OPTS[CURLOPT_CAINFO] = dirname(__FILE__) . '/../src/fb_ca_chain_bundle.crt';
     $response = $facebook->api('/naitik');
 
     unset(Facebook::$CURL_OPTS[CURLOPT_CAINFO]);
