@@ -141,10 +141,11 @@ class Facebook
    * Maps aliases to Facebook domains.
    */
   public static $DOMAIN_MAP = array(
-    'api'      => 'https://api.facebook.com/',
-    'api_read' => 'https://api-read.facebook.com/',
-    'graph'    => 'https://graph.facebook.com/',
-    'www'      => 'https://www.facebook.com/',
+    'api'       => 'https://api.facebook.com/',
+    'api_video' => 'https://api-video.facebook.com/',
+    'api_read'  => 'https://api-read.facebook.com/',
+    'graph'     => 'https://graph.facebook.com/',
+    'www'       => 'https://www.facebook.com/',
   );
 
   /**
@@ -865,6 +866,8 @@ class Facebook
     $name = 'api';
     if (isset($READ_ONLY_CALLS[strtolower($method)])) {
       $name = 'api_read';
+    } else if (strtolower($method) == 'video.upload') {
+      $name = 'api_video';
     }
     return self::getUrl($name, 'restserver.php');
   }

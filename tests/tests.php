@@ -754,6 +754,29 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase
       $response['id'], '5526183', 'should get expected id.');
   }
 
+  public function testVideoUpload() {
+    $facebook = new FBRecordURL(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'cookie' => true,
+    ));
+    $facebook->setSession(self::$VALID_EXPIRED_SESSION);
+    $facebook->api(array('method' => 'video.upload'));
+    $this->assertContains('//api-video.', $facebook->getRequestedURL(),
+      'video.upload should go against api-video');
+  }
+}
+
+class FBRecordURL extends Facebook {
+  private $url;
+
+  protected function _oauthRequest($url, $params) {
+    $this->url = $url;
+  }
+
+  public function getRequestedURL() {
+    return $this->url;
+  }
 }
 
 class FBPublic extends Facebook {
