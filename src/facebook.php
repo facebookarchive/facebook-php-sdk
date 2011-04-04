@@ -768,8 +768,6 @@ class Facebook
    * Then saves it in $this->signed_data
    *
    * @param String A signed token
-   * @param Boolean Should we remove the parts of the payload that
-   *                are used by the algorithm?
    * @return Array the payload inside it or null if the sig is wrong
    */
   protected function parseSignedRequest($signed_request) {
