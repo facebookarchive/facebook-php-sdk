@@ -1,5 +1,5 @@
-Facebook PHP SDK
-================
+Facebook PHP SDK (v.3.0.0)
+==========================
 
 The [Facebook Platform](http://developers.facebook.com/) is
 a set of APIs that make your application more social. Read more about
@@ -23,25 +23,31 @@ have is:
     require './facebook.php';
 
     $facebook = new Facebook(array(
-      'appId'  => 'YOUR APP ID',
-      'secret' => 'YOUR API SECRET',
-      'cookie' => true, // enable optional cookie support
+      'appId'  => 'YOUR_APP_ID',
+      'secret' => 'YOUR_APP_SECRET',
     ));
+
+    // Get User ID
+    $user = $facebook->getUser();
 
 To make [API][API] calls:
 
-    try {
-      $me = $facebook->api('/me');
-    } catch (FacebookApiException $e) {
-      error_log($e);
+    if ($user) {
+      try {
+        // Proceed knowing you have a logged in user who's authenticated.
+        $user_profile = $facebook->api('/me');
+      } catch (FacebookApiException $e) {
+        error_log($e);
+        $user = null;
+      }
     }
 
-Logged in vs Logged out:
+Login or logout url will be needed depending on current user state.
 
-    if ($facebook->getSession()) {
-      echo '<a href="' . $facebook->getLogoutUrl() . '">Logout</a>';
+    if ($user) {
+      $logoutUrl = $facebook->getLogoutUrl();
     } else {
-      echo '<a href="' . $facebook->getLoginUrl() . '">Login</a>';
+      $loginUrl = $facebook->getLoginUrl();
     }
 
 [examples]: http://github.com/facebook/php-sdk/blob/master/examples/example.php
