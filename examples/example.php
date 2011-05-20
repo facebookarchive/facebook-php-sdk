@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * Copyright 2011 Facebook, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,38 +15,35 @@
  * under the License.
  */
 
-
 require '../src/facebook.php';
 
 // Create our Application instance (replace this with your appId and secret).
 $facebook = new Facebook(array(
   'appId'  => '117743971608120',
   'secret' => '943716006e74d9b9283d4d5d8ab93204',
-  'cookie' => true,
 ));
 
-// We may or may not have this data based on a $_GET or $_COOKIE based session.
-//
-// If we get a session here, it means we found a correctly signed session using
-// the Application Secret only Facebook and the Application know. We dont know
-// if it is still valid until we make an API call using the session. A session
-// can become invalid if it has already expired (should not be getting the
-// session back in this case) or if the user logged out of Facebook.
-$session = $facebook->getSession();
+// Get User ID
+$user = $facebook->getUser();
 
-$me = null;
-// Session based API call.
-if ($session) {
+// We may or may not have this data based on whether the user is logged in.
+//
+// If we have a $user id here, it means we know the user is logged into
+// Facebook, but we don't know if the access token is valid. An access
+// token is invalid if the user logged out of Facebook.
+
+if ($user) {
   try {
-    $uid = $facebook->getUser();
-    $me = $facebook->api('/me');
+    // Proceed knowing you have a logged in user who's authenticated.
+    $user_profile = $facebook->api('/me');
   } catch (FacebookApiException $e) {
     error_log($e);
+    $user = null;
   }
 }
 
-// login or logout url will be needed depending on current user state.
-if ($me) {
+// Login or logout url will be needed depending on current user state.
+if ($user) {
   $logoutUrl = $facebook->getLogoutUrl();
 } else {
   $loginUrl = $facebook->getLoginUrl();
@@ -75,69 +71,31 @@ $naitik = $facebook->api('/naitik');
     </style>
   </head>
   <body>
-    <!--
-      We use the JS SDK to provide a richer user experience. For more info,
-      look here: http://github.com/facebook/connect-js
-    -->
-    <div id="fb-root"></div>
-    <script>
-      window.fbAsyncInit = function() {
-        FB.init({
-          appId   : '<?php echo $facebook->getAppId(); ?>',
-          session : <?php echo json_encode($session); ?>, // don't refetch the session when PHP already has it
-          status  : true, // check login status
-          cookie  : true, // enable cookies to allow the server to access the session
-          xfbml   : true // parse XFBML
-        });
+    <h1>php-sdk</h1>
 
-        // whenever the user logs in, we refresh the page
-        FB.Event.subscribe('auth.login', function() {
-          window.location.reload();
-        });
-      };
-
-      (function() {
-        var e = document.createElement('script');
-        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-        e.async = true;
-        document.getElementById('fb-root').appendChild(e);
-      }());
-    </script>
-
-
-    <h1><a href="example.php">php-sdk</a></h1>
-
-    <?php if ($me): ?>
-    <a href="<?php echo $logoutUrl; ?>">
-      <img src="http://static.ak.fbcdn.net/rsrc.php/z2Y31/hash/cxrz4k7j.gif">
-    </a>
+    <?php if ($user): ?>
+      <a href="<?php echo $logoutUrl; ?>">Logout</a>
     <?php else: ?>
-    <div>
-      Using JavaScript &amp; XFBML: <fb:login-button></fb:login-button>
-    </div>
-    <div>
-      Without using JavaScript &amp; XFBML:
-      <a href="<?php echo $loginUrl; ?>">
-        <img src="http://static.ak.fbcdn.net/rsrc.php/zB6N8/hash/4li2k73z.gif">
-      </a>
-    </div>
+      <div>
+        Login using OAuth 2.0 handled by the PHP SDK:
+        <a href="<?php echo $loginUrl; ?>">Login with Facebook</a>
+      </div>
     <?php endif ?>
 
-    <h3>Session</h3>
-    <?php if ($me): ?>
-    <pre><?php print_r($session); ?></pre>
+    <h3>PHP Session</h3>
+    <pre><?php print_r($_SESSION); ?></pre>
 
-    <h3>You</h3>
-    <img src="https://graph.facebook.com/<?php echo $uid; ?>/picture">
-    <?php echo $me['name']; ?>
+    <?php if ($user): ?>
+      <h3>You</h3>
+      <img src="https://graph.facebook.com/<?php echo $user; ?>/picture">
 
-    <h3>Your User Object</h3>
-    <pre><?php print_r($me); ?></pre>
+      <h3>Your User Object (/me)</h3>
+      <pre><?php print_r($user_profile); ?></pre>
     <?php else: ?>
-    <strong><em>You are not Connected.</em></strong>
+      <strong><em>You are not Connected.</em></strong>
     <?php endif ?>
 
-    <h3>Naitik</h3>
+    <h3>Public profile of Naitik</h3>
     <img src="https://graph.facebook.com/naitik/picture">
     <?php echo $naitik['name']; ?>
   </body>
