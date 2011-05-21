@@ -8,20 +8,21 @@ Consists of two classes. The first (class BaseFacebook) maintains the core of th
 
 If you’re currently using the PHP SDK (v2.2.x) for authentication, you will recall that the login code looked like this:
 
-$facebook = new Facebook(…);
-$session = $facebook->getSession();
-if ($session) {
-  // proceed knowing you have a valid user session
-} else {
-  // proceed knowing you require user login and/or authentication
-}
+     $facebook = new Facebook(…);
+     $session = $facebook->getSession();
+     if ($session) {
+       // proceed knowing you have a valid user session
+     } else {
+       // proceed knowing you require user login and/or authentication
+     }
+
 The login code is now:
 
-$facebook = new Facebook(…);
-$user = $facebook->getUser();
-if ($user) {
-  // proceed knowing you have a logged in user who's authenticated
-} else {
-  // proceed knowing you require user login and/or authentication
-}
+     $facebook = new Facebook(…);
+     $user = $facebook->getUser();
+     if ($user) {
+       // proceed knowing you have a logged in user who's authenticated
+     } else {
+       // proceed knowing you require user login and/or authentication
+     }
 
