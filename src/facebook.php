@@ -34,7 +34,7 @@ class Facebook extends BaseFacebook
    */
   public function __construct($config) {
     parent::__construct($config);
-    session_start();
+    @session_start();
   }
 
   /**
