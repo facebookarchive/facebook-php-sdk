@@ -94,8 +94,44 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                       'Expect file upload support to be on.');
   }
 
+  public function testGetCurrentURL() {
+    $facebook = new FBGetCurrentURLFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    // fake the HPHP $_SERVER globals
+    $_SERVER['HTTP_HOST'] = 'www.test.com';
+    $_SERVER['REQUEST_URI'] = '/unit-tests.php?one=one&two=two&three=three';
+    $current_url = $facebook->publicGetCurrentUrl();
+    $this->assertEquals(
+      'http://www.test.com/unit-tests.php?one=one&two=two&three=three',
+      $current_url,
+      'getCurrentUrl function is changing the current URL');
+
+    // ensure structure of valueless GET params is retained (sometimes
+    // an = sign was present, and sometimes it was not)
+    // first test when equal signs are present
+    $_SERVER['HTTP_HOST'] = 'www.test.com';
+    $_SERVER['REQUEST_URI'] = '/unit-tests.php?one=&two=&three=';
+    $current_url = $facebook->publicGetCurrentUrl();
+    $this->assertEquals(
+      'http://www.test.com/unit-tests.php?one=&two=&three=',
+      $current_url,
+      'getCurrentUrl function is changing the current URL');
+
+    // now confirm that
+    $_SERVER['HTTP_HOST'] = 'www.test.com';
+    $_SERVER['REQUEST_URI'] = '/unit-tests.php?one&two&three';
+    $current_url = $facebook->publicGetCurrentUrl();
+    $this->assertEquals(
+      'http://www.test.com/unit-tests.php?one&two&three',
+      $current_url,
+      'getCurrentUrl function is changing the current URL');
+  }
+
   public function testGetLoginURL() {
-    $facebook = new TransientFacebook(array(
+    $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -120,7 +156,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testGetLoginURLWithExtraParams() {
-    $facebook = new TransientFacebook(array(
+    $facebook = new Facebook(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -148,30 +184,28 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testGetCodeWithValidCSRFState() {
-    $csrf_cookie_name = FBCode::constructCSRFTokenCookieName(self::APP_ID);
-    $_COOKIE[$csrf_cookie_name] = $this->generateMD5HashOfRandomValue();
     $facebook = new FBCode(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
 
+    $facebook->setCSRFStateToken();
     $code = $_REQUEST['code'] = $this->generateMD5HashOfRandomValue();
-    $_REQUEST['state'] = $_COOKIE[$csrf_cookie_name];
+    $_REQUEST['state'] = $facebook->getCSRFStateToken();
     $this->assertEquals($code,
                         $facebook->publicGetCode(),
                         'Expect code to be pulled from $_REQUEST[\'code\']');
   }
 
   public function testGetCodeWithInvalidCSRFState() {
-    $csrf_cookie_name = FBCode::constructCSRFTokenCookieName(self::APP_ID);
-    $_COOKIE[$csrf_cookie_name] = $this->generateMD5HashOfRandomValue();
     $facebook = new FBCode(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
 
+    $facebook->setCSRFStateToken();
     $code = $_REQUEST['code'] = $this->generateMD5HashOfRandomValue();
-    $_REQUEST['state'] = $_COOKIE[$csrf_cookie_name]."forgery!!!";
+    $_REQUEST['state'] = $facebook->getCSRFStateToken().'forgery!!!';
     $this->assertFalse($facebook->publicGetCode(),
                        'Expect getCode to fail, CSRF state should not match.');
   }
@@ -183,7 +217,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
 
     $code = $_REQUEST['code'] = $this->generateMD5HashOfRandomValue();
-    // don't set $_REQUEST['fbcsrf_<app-id>']
+    // intentionally don't set CSRF token at all
     $this->assertFalse($facebook->publicGetCode(),
                        'Expect getCode to fail, CSRF state not sent back.');
 
@@ -562,9 +596,20 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
-    $response = $facebook->api('/' . self::APP_ID . '/insights');
-    $this->assertTrue(count($response['data']) > 0,
-                      'Expect some data back.');
+
+    $proper_exception_thrown = false;
+    try {
+      $response = $facebook->api('/' . self::APP_ID . '/insights');
+      $this->fail('Desktop applications need a user token for insights.');
+    } catch (FacebookApiException $e) {
+      $proper_exception_thrown =
+        strpos($e->getMessage(),
+               'Requires session when calling from a desktop app') !== false;
+    } catch (Exception $e) {}
+
+    $this->assertTrue($proper_exception_thrown,
+                      'Incorrect exception type thrown when trying to gain '.
+                      'insights for desktop app without a user access token.');
   }
 
   public function testBase64UrlEncode() {
@@ -734,6 +779,7 @@ class TransientFacebook extends BaseFacebook {
   protected function getPersistentData($key, $default = false) {
     return $default;
   }
+  protected function clearPersistentData($key) {}
   protected function clearAllPersistentData() {}
 }
 
@@ -762,23 +808,34 @@ class PersistentFBPublic extends Facebook {
   public function publicParseSignedRequest($input) {
     return $this->parseSignedRequest($input);
   }
+
   public function publicSetPersistentData($key, $value) {
     $this->setPersistentData($key, $value);
   }
 }
 
-class FBCode extends TransientFacebook {
+class FBCode extends Facebook {
   public function publicGetCode() {
     return $this->getCode();
   }
 
-  public static function constructCSRFTokenCookieName($app_id) {
-    return 'fbcsrf_'.$app_id;
+  public function setCSRFStateToken() {
+    $this->establishCSRFTokenState();
+  }
+
+  public function getCSRFStateToken() {
+    return $this->getPersistentData('state');
   }
 }
 
 class FBAccessToken extends TransientFacebook {
   public function publicGetApplicationAccessToken() {
     return $this->getApplicationAccessToken();
+  }
+}
+
+class FBGetCurrentURLFacebook extends TransientFacebook {
+  public function publicGetCurrentUrl() {
+    return $this->getCurrentUrl();
   }
 }
