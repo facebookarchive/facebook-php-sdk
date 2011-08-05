@@ -120,7 +120,7 @@ abstract class BaseFacebook
   /**
    * Version.
    */
-  const VERSION = '3.0.1';
+  const VERSION = '3.1.0';
 
   /**
    * Default options for curl.
@@ -129,7 +129,7 @@ abstract class BaseFacebook
     CURLOPT_CONNECTTIMEOUT => 10,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 60,
-    CURLOPT_USERAGENT      => 'facebook-php-3.0',
+    CURLOPT_USERAGENT      => 'facebook-php-3.1',
   );
 
   /**
@@ -372,15 +372,19 @@ abstract class BaseFacebook
   }
 
   /**
-   * Get the data from a signed_request token.
+   * Retrieve the signed request, either from a request parameter or,
+   * if not present, from a cookie.
    *
-   * @return string The base domain
+   * @return string the signed request, if available, or null otherwise.
    */
   public function getSignedRequest() {
     if (!$this->signedRequest) {
       if (isset($_REQUEST['signed_request'])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_REQUEST['signed_request']);
+      } else if (isset($_COOKIE[$this->getSignedRequestCookieName()])) {
+        $this->signedRequest = $this->parseSignedRequest(
+          $_COOKIE[$this->getSignedRequestCookieName()]);
       }
     }
     return $this->signedRequest;
@@ -461,6 +465,13 @@ abstract class BaseFacebook
   public function getLoginUrl($params=array()) {
     $this->establishCSRFTokenState();
     $currentUrl = $this->getCurrentUrl();
+
+    // if 'scope' is passed as an array, convert to comma separated list
+    $scopeParams = isset($params['scope']) ? $params['scope'] : null;
+    if ($scopeParams && is_array($scopeParams)) {
+      $params['scope'] = implode(',', $scopeParams);
+    }
+
     return $this->getUrl(
       'www',
       'dialog/oauth',
@@ -528,6 +539,19 @@ abstract class BaseFacebook
     } else {
       return call_user_func_array(array($this, '_graph'), $args);
     }
+  }
+
+  /**
+   * Constructs and returns the name of the cookie that
+   * potentially houses the signed request for the app user.
+   * The cookie is not set by the BaseFacebook class, but
+   * it may be set by the JavaScript SDK.
+   *
+   * @return string the name of the cookie that would house
+   *         the signed request value.
+   */
+  protected function getSignedRequestCookieName() {
+    return 'fbsr_'.$this->getAppId();
   }
 
   /**
