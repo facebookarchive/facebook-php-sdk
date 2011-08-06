@@ -1,4 +1,4 @@
-Facebook PHP SDK (v.3.0.0)
+Facebook PHP SDK (v.3.1.0)
 ==========================
 
 The [Facebook Platform](http://developers.facebook.com/) is
@@ -18,7 +18,7 @@ Usage
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
 
-    require './facebook.php';
+    require 'php-sdk/src/facebook.php';
 
     $facebook = new Facebook(array(
       'appId'  => 'YOUR_APP_ID',
