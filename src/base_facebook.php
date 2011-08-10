@@ -343,7 +343,7 @@ abstract class BaseFacebook
         $this->setPersistentData('access_token', $access_token);
         return $access_token;
       }
-      
+
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
