@@ -314,7 +314,7 @@ abstract class BaseFacebook
     // access token, in case we navigate to the /oauth/access_token
     // endpoint, where SOME access token is required.
     $this->setAccessToken($this->getApplicationAccessToken());
-    if ($user_access_token = $this->getUserAccessToken()) {
+    if (($user_access_token = $this->getUserAccessToken()) !== false) {
       $this->setAccessToken($user_access_token);
     }
 
