@@ -705,7 +705,7 @@ abstract class BaseFacebook
 
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
-      throw new FacebookApiException($result);
+      $this->throwAPIException($result);
     }
 
     return $result;
