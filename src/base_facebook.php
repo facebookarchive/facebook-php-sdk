@@ -708,6 +708,11 @@ abstract class BaseFacebook
       $this->throwAPIException($result);
     }
 
+    if ($params['method'] === 'auth.expireSession' ||
+        $params['method'] === 'auth.revokeAuthorization') {
+      $this->destroySession();
+    }
+
     return $result;
   }
 
@@ -1076,6 +1081,15 @@ abstract class BaseFacebook
    */
   protected static function base64UrlDecode($input) {
     return base64_decode(strtr($input, '-_', '+/'));
+  }
+
+  /**
+   * Destroy the current session
+   */
+  public function destroySession() {
+    $this->setAccessToken(null);
+    $this->user = 0;
+    $this->clearAllPersistentData();
   }
 
   /**
