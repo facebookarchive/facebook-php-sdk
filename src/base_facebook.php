@@ -1042,6 +1042,8 @@ abstract class BaseFacebook
       case 'OAuthException':
         // OAuth 2.0 Draft 10 style
       case 'invalid_token':
+        // REST server errors are just Exceptions
+      case 'Exception':
         $message = $e->getMessage();
       if ((strpos($message, 'Error validating access token') !== false) ||
           (strpos($message, 'Invalid OAuth access token') !== false)) {
