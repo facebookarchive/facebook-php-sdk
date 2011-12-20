@@ -67,5 +67,5 @@ Report Issues/Bugs
 ===============
 [Bugs](https://developers.facebook.com/bugs)
 
-[Questions](http://facebook.stackoverflow.com/questions/tagged/android)
+[Questions](http://facebook.stackoverflow.com)
 
