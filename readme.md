@@ -2,12 +2,9 @@ Facebook PHP SDK (v.3.1.1)
 ==========================
 
 The [Facebook Platform](http://developers.facebook.com/) is
-a set of APIs that make your application more social. Read more about
-[integrating Facebook with your web site](http://developers.facebook.com/docs/guides/web)
-on the Facebook developer site.
+a set of APIs that make your app more social
 
-This repository contains the open source PHP SDK that allows you to utilize the
-above on your website. Except as otherwise noted, the Facebook PHP SDK
+This repository contains the open source PHP SDK that allows you to access Facebook Platform from your PHP app. Except as otherwise noted, the Facebook PHP SDK
 is licensed under the Apache Licence, Version 2.0
 (http://www.apache.org/licenses/LICENSE-2.0.html)
 
@@ -52,20 +49,11 @@ Login or logout url will be needed depending on current user state.
 [API]: http://developers.facebook.com/docs/api
 
 
-Feedback
---------
-
-File bugs or other issues [here].
-
-[here]: http://bugs.developers.facebook.net/
-
-
-
 Tests
 -----
 
 In order to keep us nimble and allow us to bring you new functionality, without
-compromising on stability, we have ensured full test coverage of the new SDK.
+compromising on stability, we have ensured full test coverage of the SDK.
 We are including this in the open source repository to assure you of our
 commitment to quality, but also with the hopes that you will contribute back to
 help keep it stable. The easiest way to do so is to file bugs and include a
@@ -74,4 +62,10 @@ test case.
 The tests can be executed by using this command from the base directory:
 
     phpunit --stderr --bootstrap tests/bootstrap.php tests/tests.php
+    
+Report Issues/Bugs
+===============
+[Bugs](https://developers.facebook.com/bugs)
+
+[Questions](http://facebook.stackoverflow.com/questions/tagged/android)
 
