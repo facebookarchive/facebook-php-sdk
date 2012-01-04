@@ -278,8 +278,19 @@ abstract class BaseFacebook
    *
    * @return boolean true if and only if the server supports file upload.
    */
-  public function useFileUploadSupport() {
+  public function getFileUploadSupport() {
     return $this->fileUploadSupport;
+  }
+
+  /**
+   * DEPRECATED! Please use getFileUploadSupport instead.
+   *
+   * Get the file upload support status.
+   *
+   * @return boolean true if and only if the server supports file upload.
+   */
+  public function useFileUploadSupport() {
+    return $this->getFileUploadSupport();
   }
 
   /**
@@ -788,7 +799,7 @@ abstract class BaseFacebook
     }
 
     $opts = self::$CURL_OPTS;
-    if ($this->useFileUploadSupport()) {
+    if ($this->getFileUploadSupport()) {
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
       $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');

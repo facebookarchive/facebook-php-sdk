@@ -48,6 +48,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                         'Expect the App ID to be set.');
     $this->assertEquals($facebook->getApiSecret(), self::SECRET,
                         'Expect the API secret to be set.');
+    $this->assertTrue($facebook->getFileUploadSupport(),
+                      'Expect file upload support to be on.');
+    // alias (depricated) for getFileUploadSupport -- test until removed
     $this->assertTrue($facebook->useFileUploadSupport(),
                       'Expect file upload support to be on.');
   }
@@ -88,9 +91,15 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
+    $this->assertFalse($facebook->getFileUploadSupport(),
+                       'Expect file upload support to be off.');
+    // alias for getFileUploadSupport (depricated), testing until removed
     $this->assertFalse($facebook->useFileUploadSupport(),
                        'Expect file upload support to be off.');
     $facebook->setFileUploadSupport(true);
+    $this->assertTrue($facebook->getFileUploadSupport(),
+                      'Expect file upload support to be on.');
+    // alias for getFileUploadSupport (depricated), testing until removed
     $this->assertTrue($facebook->useFileUploadSupport(),
                       'Expect file upload support to be on.');
   }
