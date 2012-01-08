@@ -527,6 +527,21 @@ abstract class BaseFacebook
   }
 
   /**
+   * Clear all data from the persistent storage
+   * and then redirect the user to log out of Facebook as well.
+   *
+   * The parameters:
+   * - next: the url to go to after a successful logout
+   *
+   * @param array $params Provide custom parameters
+   */
+  public function logout($params=array()) {
+    $this->clearAllPersistentData();
+    header('Location: ' . $this->getLogoutUrl($params));
+    die();
+  }
+
+  /**
    * Get a login status URL to fetch the status from Facebook.
    *
    * The parameters:
