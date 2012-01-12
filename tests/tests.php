@@ -34,7 +34,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
     $this->assertEquals($facebook->getAppId(), self::APP_ID,
                         'Expect the App ID to be set.');
-    $this->assertEquals($facebook->getApiSecret(), self::SECRET,
+    $this->assertEquals($facebook->getAppSecret(), self::SECRET,
                         'Expect the API secret to be set.');
   }
 
@@ -46,7 +46,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
     $this->assertEquals($facebook->getAppId(), self::APP_ID,
                         'Expect the App ID to be set.');
-    $this->assertEquals($facebook->getApiSecret(), self::SECRET,
+    $this->assertEquals($facebook->getAppSecret(), self::SECRET,
                         'Expect the API secret to be set.');
     $this->assertTrue($facebook->getFileUploadSupport(),
                       'Expect file upload support to be on.');
@@ -72,6 +72,16 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
     $facebook->setApiSecret('dummy');
     $this->assertEquals($facebook->getApiSecret(), 'dummy',
+                        'Expect the API secret to be dummy.');
+  }
+
+  public function testSetAPPSecret() {
+    $facebook = new TransientFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $facebook->setAppSecret('dummy');
+    $this->assertEquals($facebook->getAppSecret(), 'dummy',
                         'Expect the API secret to be dummy.');
   }
 

@@ -161,11 +161,11 @@ abstract class BaseFacebook
   protected $appId;
 
   /**
-   * The Application API Secret.
+   * The Application App Secret.
    *
    * @var string
    */
-  protected $apiSecret;
+  protected $appSecret;
 
   /**
    * The ID of the Facebook user, or 0 if the user is logged out.
@@ -211,7 +211,7 @@ abstract class BaseFacebook
    */
   public function __construct($config) {
     $this->setAppId($config['appId']);
-    $this->setApiSecret($config['secret']);
+    $this->setAppSecret($config['secret']);
     if (isset($config['fileUpload'])) {
       $this->setFileUploadSupport($config['fileUpload']);
     }
@@ -243,23 +243,45 @@ abstract class BaseFacebook
   }
 
   /**
-   * Set the API Secret.
+   * Set the App Secret.
    *
-   * @param string $apiSecret The API Secret
+   * @param string $apiSecret The App Secret
    * @return BaseFacebook
+   * @deprecated
    */
   public function setApiSecret($apiSecret) {
-    $this->apiSecret = $apiSecret;
+    $this->setAppSecret($apiSecret);
     return $this;
   }
 
   /**
-   * Get the API Secret.
+   * Set the App Secret.
    *
-   * @return string the API Secret
+   * @param string $appSecret The App Secret
+   * @return BaseFacebook
+   */
+  public function setAppSecret($appSecret) {
+    $this->appSecret = $appSecret;
+    return $this;
+  }
+
+  /**
+   * Get the App Secret.
+   *
+   * @return string the App Secret
+   * @deprecated
    */
   public function getApiSecret() {
-    return $this->apiSecret;
+    return $this->getAppSecret();
+  }
+
+  /**
+   * Get the App Secret.
+   *
+   * @return string the App Secret
+   */
+  public function getAppSecret() {
+    return $this->appSecret;
   }
 
   /**
@@ -632,7 +654,7 @@ abstract class BaseFacebook
    *                public information about users and applications.
    */
   protected function getApplicationAccessToken() {
-    return $this->appId.'|'.$this->apiSecret;
+    return $this->appId.'|'.$this->appSecret;
   }
 
   /**
@@ -675,7 +697,7 @@ abstract class BaseFacebook
         $this->_oauthRequest(
           $this->getUrl('graph', '/oauth/access_token'),
           $params = array('client_id' => $this->getAppId(),
-                          'client_secret' => $this->getApiSecret(),
+                          'client_secret' => $this->getAppSecret(),
                           'redirect_uri' => $redirect_uri,
                           'code' => $code));
     } catch (FacebookApiException $e) {
@@ -862,7 +884,7 @@ abstract class BaseFacebook
 
     // check sig
     $expected_sig = hash_hmac('sha256', $payload,
-                              $this->getApiSecret(), $raw = true);
+                              $this->getAppSecret(), $raw = true);
     if ($sig !== $expected_sig) {
       self::errorLog('Bad Signed JSON signature!');
       return null;
