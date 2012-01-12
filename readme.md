@@ -17,7 +17,7 @@ Usage
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
 
-    require 'php-sdk/src/facebook.php';
+    require 'facebook-php-sdk/src/facebook.php';
 
     $facebook = new Facebook(array(
       'appId'  => 'YOUR_APP_ID',
@@ -47,7 +47,7 @@ Login or logout url will be needed depending on current user state.
       $loginUrl = $facebook->getLoginUrl();
     }
 
-[examples]: http://github.com/facebook/php-sdk/blob/master/examples/example.php
+[examples]: http://github.com/facebook/facebook-php-sdk/blob/master/examples/example.php
 [API]: http://developers.facebook.com/docs/api
 
 
@@ -64,7 +64,19 @@ test case.
 The tests can be executed by using this command from the base directory:
 
     phpunit --stderr --bootstrap tests/bootstrap.php tests/tests.php
-    
+
+
+Contributing
+===========
+For us to accept contributions you will have to first have signed the [Contributor License Agreement](https://developers.facebook.com/opensource/cla).
+
+When commiting, keep all lines to less than 80 characters, and try to follow the existing style.
+
+Before creating a pull request, squash your commits into a single commit.
+
+Add the comments where needed, and provide ample explanation in the commit message.
+
+
 Report Issues/Bugs
 ===============
 [Bugs](https://developers.facebook.com/bugs)
