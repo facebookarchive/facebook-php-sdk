@@ -1123,8 +1123,9 @@ abstract class BaseFacebook
    * Destroy the current session
    */
   public function destroySession() {
-    $this->setAccessToken(null);
-    $this->user = 0;
+    $this->accessToken = null;
+    $this->signedRequest = null;
+    $this->user = null;
     $this->clearAllPersistentData();
   }
 
