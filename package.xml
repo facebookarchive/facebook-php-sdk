@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<package xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packagerversion="1.4.10" version="2.0" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0        http://pear.php.net/dtd/tasks-1.0.xsd        http://pear.php.net/dtd/package-2.0        http://pear.php.net/dtd/package-2.0.xsd">
+  <name>Facebook</name>
+  <channel>pear.php.net</channel>
+  <summary>Facebook PHP SDK</summary>
+  <description>Facebook PHP SDK</description>
+  <lead>
+    <name>Facebook</name>
+    <user/>
+    <email>facebook.com</email>
+    <active>yes</active>
+  </lead>
+  <date>2012-01-10</date>
+  <time>23:53:23</time>
+  <version>
+    <release>0.0.1</release>
+    <api>0.0.1</api>
+  </version>
+  <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+  </stability>
+  <license>Apache Licence, Version 2.0</license>
+  <notes>-</notes>
+  <contents>
+    <dir name="/">
+      <file name="examples/example.php" role="doc" md5sum="c16b4247b4a2506a44166fb37bb1efe2"/>
+      <file name="examples/with_js_sdk.php" role="doc" md5sum="555e738cb8c6b42834a5c5a2083bd3e6"/>
+      <file name="tests/bootstrap.php" role="test" md5sum="4bac8ce7b0668b62951f4609336b7f59"/>
+      <file name="tests/tests.php" role="test" md5sum="c32b25c372b06a05993fa60c40937475"/>
+      <file name="src/BaseFacebook.php" role="php" md5sum="969cc3b4a4c4c0bb4f26fe478716d2b7"/>
+      <file name="src/Facebook.php" role="php" md5sum="2e6602ce9bed007299c25144f8130f96"/>
+      <file name="src/FacebookApiException.php" role="php" md5sum="72220d69ed10709bc595b052ab2944fb"/>
+      <file name="src/fb_ca_chain_bundle.crt" role="php" md5sum="c3055d03e94bbee13c7c6cc3a76083d9"/>
+      <file name="readme.md" role="doc" md5sum="9829ce8f97398c3ae96838a826b30264"/>
+      <file name="changelog.md" role="doc" md5sum="31fce8336dd5a3f061686f19e19bd56d"/>
+    </dir>
+  </contents>
+  <dependencies>
+    <required>
+      <php>
+        <min>5.3</min>
+      </php>
+      <pearinstaller>
+        <min>1.4</min>
+      </pearinstaller>
+      <package>
+        <name>Universal</name>
+        <channel>pear.corneltek.com</channel>
+        <min>0.0.0</min>
+      </package>
+    </required>
+  </dependencies>
+  <phprelease>
+    <filelist>
+      <install name="examples/example.php" as="example.php"/>
+      <install name="examples/with_js_sdk.php" as="with_js_sdk.php"/>
+      <install name="tests/bootstrap.php" as="bootstrap.php"/>
+      <install name="tests/tests.php" as="tests.php"/>
+      <install name="src/BaseFacebook.php" as="BaseFacebook.php"/>
+      <install name="src/Facebook.php" as="Facebook.php"/>
+      <install name="src/FacebookApiException.php" as="FacebookApiException.php"/>
+      <install name="src/fb_ca_chain_bundle.crt" as="fb_ca_chain_bundle.crt"/>
+      <install name="readme.md" as="readme.md"/>
+      <install name="changelog.md" as="changelog.md"/>
+    </filelist>
+  </phprelease>
+</package>

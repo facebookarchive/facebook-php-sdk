@@ -14,8 +14,9 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-
-require '../src/facebook.php';
+require '../src/FacebookApiException.php';
+require '../src/FacebookBase.php';
+require '../src/Facebook.php';
 
 // Create our Application instance (replace this with your appId and secret).
 $facebook = new Facebook(array(

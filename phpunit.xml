@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php"
+         backupGlobals="false"
+         verbose="true">
+
+<testsuites>
+  <testsuite name="Test Suite">
+      <file>tests/tests.php</file>
+  </testsuite>
+</testsuites>
+
+</phpunit>
