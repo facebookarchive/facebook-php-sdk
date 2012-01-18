@@ -602,6 +602,17 @@ abstract class BaseFacebook
   }
 
   /**
+   * Constructs and returns the name of the coookie that potentially contain
+   * metadata. The cookie is not set by the BaseFacebook class, but it may be
+   * set by the JavaScript SDK.
+   *
+   * @return string the name of the cookie that would house metadata.
+   */
+  protected function getMetadataCookieName() {
+    return 'fbm_'.$this->getAppId();
+  }
+
+  /**
    * Get the authorization code from the query parameters, if it exists,
    * and otherwise return false to signal no authorization code was
    * discoverable.
@@ -1086,7 +1097,7 @@ abstract class BaseFacebook
   /**
    * Analyzes the supplied result to see if it was thrown
    * because the access token is no longer valid.  If that is
-   * the case, then the persistent store is cleared.
+   * the case, then we destroy the session.
    *
    * @param $result array A record storing the error message returned
    *                      by a failed API call.
@@ -1101,12 +1112,13 @@ abstract class BaseFacebook
         // REST server errors are just Exceptions
       case 'Exception':
         $message = $e->getMessage();
-      if ((strpos($message, 'Error validating access token') !== false) ||
-          (strpos($message, 'Invalid OAuth access token') !== false)) {
-        $this->setAccessToken(null);
-        $this->user = 0;
-        $this->clearAllPersistentData();
-      }
+        if ((strpos($message, 'Error validating access token') !== false) ||
+            (strpos($message, 'Invalid OAuth access token') !== false) ||
+            (strpos($message, 'An active access token must be used') !== false)
+        ) {
+          $this->destroySession();
+        }
+        break;
     }
 
     throw $e;
@@ -1150,6 +1162,63 @@ abstract class BaseFacebook
     $this->signedRequest = null;
     $this->user = null;
     $this->clearAllPersistentData();
+
+    // Javascript sets a cookie that will be used in getSignedRequest that we
+    // need to clear if we can
+    $cookie_name = $this->getSignedRequestCookieName();
+    if (array_key_exists($cookie_name, $_COOKIE)) {
+      unset($_COOKIE[$cookie_name]);
+      if (!headers_sent()) {
+        // The base domain is stored in the metadata cookie if not we fallback
+        // to the current hostname
+        $base_domain = '.'. $_SERVER['HTTP_HOST'];
+
+        $metadata = $this->getMetadataCookie();
+        if (array_key_exists('base_domain', $metadata) &&
+            !empty($metadata['base_domain'])) {
+          $base_domain = $metadata['base_domain'];
+        }
+
+        setcookie($cookie_name, '', 0, '/', $base_domain);
+      } else {
+        self::errorLog(
+          'There exists a cookie that we wanted to clear that we couldn\'t '.
+          'clear because headers was already sent. Make sure to do the first '.
+          'API call before outputing anything'
+        );
+      }
+    }
+  }
+
+  /**
+   * Parses the metadata cookie that our Javascript API set
+   *
+   * @return  an array mapping key to value
+   */
+  protected function getMetadataCookie() {
+    $cookie_name = $this->getMetadataCookieName();
+    if (!array_key_exists($cookie_name, $_COOKIE)) {
+      return array();
+    }
+
+    // The cookie value can be wrapped in "-characters so remove them
+    $cookie_value = trim($_COOKIE[$cookie_name], '"');
+
+    if (empty($cookie_value)) {
+      return array();
+    }
+
+    $parts = explode('&', $cookie_value);
+    $metadata = array();
+    foreach ($parts as $part) {
+      $pair = explode('=', $part, 2);
+      if (!empty($pair[0])) {
+        $metadata[urldecode($pair[0])] =
+          (count($pair) > 1) ? urldecode($pair[1]) : '';
+      }
+    }
+
+    return $metadata;
   }
 
   /**
