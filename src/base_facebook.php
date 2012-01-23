@@ -150,6 +150,7 @@ abstract class BaseFacebook
     'api_video' => 'https://api-video.facebook.com/',
     'api_read'  => 'https://api-read.facebook.com/',
     'graph'     => 'https://graph.facebook.com/',
+    'graph_video' => 'https://graph-video.facebook.com/',
     'www'       => 'https://www.facebook.com/',
   );
 
@@ -751,6 +752,21 @@ abstract class BaseFacebook
   }
 
   /**
+   * Return true if this is video post.
+   *
+   * @param string $path The path
+   * @param string $method The http method (default 'GET')
+   *
+   * @return boolean true if this is video post
+   */
+  protected function isVideoPost($path, $method = 'GET') {
+    if ($method == 'POST' && preg_match("/^(\/)(.+)(\/)(videos)$/", $path)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Invoke the Graph API.
    *
    * @param string $path The path (required)
@@ -767,8 +783,14 @@ abstract class BaseFacebook
     }
     $params['method'] = $method; // method override as we always do a POST
 
+    if ($this->isVideoPost($path, $method)) {
+      $domainKey = 'graph_video';
+    } else {
+      $domainKey = 'graph';
+    }
+
     $result = json_decode($this->_oauthRequest(
-      $this->getUrl('graph', $path),
+      $this->getUrl($domainKey, $path),
       $params
     ), true);
 
