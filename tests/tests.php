@@ -427,7 +427,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     } catch(FacebookApiException $e) {
       // ProfileDelete means the server understood the DELETE
       $msg =
-        'OAuthException: A user access token is required to request this resource.';
+        'OAuthException: (#200) User cannot access this application';
       $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
     }
@@ -685,19 +685,20 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'secret' => self::SECRET,
     ));
 
-    $proper_exception_thrown = false;
     try {
       $response = $facebook->api('/' . self::APP_ID . '/insights');
       $this->fail('Desktop applications need a user token for insights.');
     } catch (FacebookApiException $e) {
-      $proper_exception_thrown =
-        strpos($e->getMessage(),
-               'Requires session when calling from a desktop app') !== false;
-    } catch (Exception $e) {}
-
-    $this->assertTrue($proper_exception_thrown,
-                      'Incorrect exception type thrown when trying to gain '.
-                      'insights for desktop app without a user access token.');
+      // this test is failing as the graph call is returning the wrong
+      // error message
+      $this->assertTrue(strpos($e->getMessage(),
+        'Requires session when calling from a desktop app') !== false,
+        'Incorrect exception type thrown when trying to gain ' .
+        'insights for desktop app without a user access token.');
+    } catch (Exception $e) {
+      $this->fail('Incorrect exception type thrown when trying to gain ' .
+        'insights for desktop app without a user access token.');
+    }
   }
 
   public function testBase64UrlEncode() {
