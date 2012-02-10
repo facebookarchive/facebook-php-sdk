@@ -330,10 +330,10 @@ abstract class BaseFacebook
   }
   
   /**
-   * Sets the new access token persistently,
+   * Sets the new access token persistently and refreshes user's cache,
    * so even after refresh, 
-   * the given access token still persists
-   * and refreshes user's id. Use it if you need 
+   * the given access token still persists.
+   * Use it if you need 
    * to set accesss token which has been taken from database,
    * for example
    *
