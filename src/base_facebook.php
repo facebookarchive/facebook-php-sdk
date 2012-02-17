@@ -341,7 +341,7 @@ abstract class BaseFacebook
    * @return BaseFacebook
    */
   public function setPersistentAccessToken($access_token) {
-    $this->accessToken = $access_token;
+    $this->setAccessToken($access_token);
     $this->user = $this->getUserFromAccessToken();
     $this->setPersistentData('access_token', $access_token);
     $this->setPersistentData('user_id', $this->user);
