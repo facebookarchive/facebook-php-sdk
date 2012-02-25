@@ -426,10 +426,12 @@ abstract class BaseFacebook
    */
   public function getSignedRequest() {
     if (!$this->signedRequest) {
-      if (isset($_REQUEST['signed_request'])) {
+      if (isset($_REQUEST['signed_request']) 
+      && false !== strpos($_REQUEST['signed_request'], '.')) {
         $this->signedRequest = $this->parseSignedRequest(
           $_REQUEST['signed_request']);
-      } else if (isset($_COOKIE[$this->getSignedRequestCookieName()])) {
+      } else if (isset($_COOKIE[$this->getSignedRequestCookieName()]) 
+      && false !== strpos($_COOKIE[$this->getSignedRequestCookieName()], '.')) {
         $this->signedRequest = $this->parseSignedRequest(
           $_COOKIE[$this->getSignedRequestCookieName()]);
       }
