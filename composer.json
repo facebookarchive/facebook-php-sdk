@@ -1,0 +1,22 @@
+{
+    "name": "facebook/php-sdk",
+    "description": "Facebook PHP SDK",
+    "keywords": ["facebook", "sdk"],
+    "type": "library",
+    "homepage": "https://github.com/facebook/facebook-php-sdk",
+    "license": "Apache2",
+    "authors": [
+        {
+            "name": "Facebook",
+            "homepage": "https://github.com/facebook/facebook-php-sdk/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.0",
+        "ext-curl": "*",
+        "ext-json": "*"
+    },
+    "autoload": {
+        "classmap": ["src"]
+    }
+}
