@@ -216,6 +216,19 @@ abstract class BaseFacebook
     if (isset($config['fileUpload'])) {
       $this->setFileUploadSupport($config['fileUpload']);
     }
+    
+    /*
+     * Added some config changes here, allowing for the
+     * passing of code, state, signed_request as part of
+     * the constructor config.
+     */
+ 	if ( isset($config['code']) ) {
+    	$this->putCode($config['code']);
+    }if ( isset($config['state']) ) {
+    	$this->putState($config['state']);
+    }if ( isset($config['signed_request']) ) {
+    	$this->putSignedRequest($config['signed_request']);
+    }
 
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
@@ -432,9 +445,24 @@ abstract class BaseFacebook
       } else if (isset($_COOKIE[$this->getSignedRequestCookieName()])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_COOKIE[$this->getSignedRequestCookieName()]);
+      } else if (isset($this->putSignedRequest) ) {
+      	$this->signedRequest = $this->putSignedRequest;
       }
     }
     return $this->signedRequest;
+  }
+  
+  /**
+   * Put a Signed Request
+   * 
+   * To help overcome issues with accessing 
+   * $_REQUEST from inside the class, we add
+   * this function to push it in.
+   * 
+   * @param string $signedRequest
+   */
+  public function putSignedRequest($signedRequest) {
+  	$this->putSignedRequest = $signedRequest;
   }
 
   /**
@@ -634,9 +662,45 @@ abstract class BaseFacebook
         self::errorLog('CSRF state token does not match one provided.');
         return false;
       }
+    }elseif(isset($this->putCode)) {
+    	if ( $this->state !== null &&
+    		isset($this->putState) &&
+    		$this->putState === $this->state) {
+		$this->state = null;
+	        $this->clearPersistentData('state');
+	        return $this->putCode;
+	      } else {
+	        self::errorLog('CSRF state token does not match one provided.');
+	        return false;
+		}
     }
-
     return false;
+  }
+  
+  /**
+   * Put Code
+   * 
+   * Allow passing of code into class to
+   * prevent accessing $_REQUEST when it
+   * is provided.
+   * 
+   * @param string $putCode
+   */
+  public function putCode($putCode) {
+    $this->putCode = $putCode;
+  }
+  
+  /**
+   * Put State
+   * 
+   * Allow passing of state into class to
+   * prevent accessing $_REQUEST when it
+   * is provided.
+   * 
+   * @param string $putState
+   */
+  public function putState($putState) {
+  	$this->putState = $putState;
   }
 
   /**
