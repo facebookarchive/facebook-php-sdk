@@ -199,6 +199,13 @@ abstract class BaseFacebook
    * @var boolean
    */
   protected $fileUploadSupport = false;
+  
+  /**
+   * This holds the redirect URL if a user supplies it
+   * 
+   * @var string
+   */
+  protected $redirect_uri = null;
 
   /**
    * Initialize a Facebook Application.
@@ -220,6 +227,10 @@ abstract class BaseFacebook
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
       $this->state = $this->getPersistentData('state');
+    }
+    
+    if (isset($config['redirect_uri'])) {
+      $this->redirect_uri = $config['redirect_uri'];
     }
   }
 
@@ -382,7 +393,7 @@ abstract class BaseFacebook
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
-        $access_token = $this->getAccessTokenFromCode($code, '');
+        $access_token = $this->getAccessTokenFromCode($code);
         if ($access_token) {
           $this->setPersistentData('code', $code);
           $this->setPersistentData('access_token', $access_token);
@@ -511,7 +522,14 @@ abstract class BaseFacebook
    */
   public function getLoginUrl($params=array()) {
     $this->establishCSRFTokenState();
-    $currentUrl = $this->getCurrentUrl();
+    
+    if(isset($params['redirect_uri'])) {
+        $this->redirect_uri = $params['redirect_uri'];
+    } else {
+        if($this->redirect_uri === null) {
+            $this->redirect_uri = $this->getCurrentUrl();
+        }
+    }
 
     // if 'scope' is passed as an array, convert to comma separated list
     $scopeParams = isset($params['scope']) ? $params['scope'] : null;
@@ -524,7 +542,7 @@ abstract class BaseFacebook
       'dialog/oauth',
       array_merge(array(
                     'client_id' => $this->getAppId(),
-                    'redirect_uri' => $currentUrl, // possibly overwritten
+                    'redirect_uri' => $this->redirect_uri, // possibly overwritten
                     'state' => $this->state),
                   $params));
   }
@@ -699,7 +717,11 @@ abstract class BaseFacebook
     }
 
     if ($redirect_uri === null) {
-      $redirect_uri = $this->getCurrentUrl();
+      if($this->redirect_uri === null) {
+        $redirect_uri = $this->getCurrentUrl();
+      } else {
+        $redirect_uri = $this->redirect_uri;
+      }
     }
 
     try {
