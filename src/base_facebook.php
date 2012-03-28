@@ -855,10 +855,10 @@ abstract class BaseFacebook
 
     $opts = self::$CURL_OPTS;
 
-	$this->headers = array();
-	$opts[CURLOPT_HEADERFUNCTION] = array(&$this, 'readHeaders');
+    $this->headers = array();
+    $opts[CURLOPT_HEADERFUNCTION] = array(&$this, 'readHeaders');
 
-    if ($this->useFileUploadSupport()) {
+    if ($this->getFileUploadSupport()) {
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
       $opts[CURLOPT_POSTFIELDS] = http_build_query($params, null, '&');
@@ -898,10 +898,10 @@ abstract class BaseFacebook
       throw $e;
     }
 
-	if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 302) {
+    if (curl_getinfo($ch, CURLINFO_HTTP_CODE) == 302) {
         curl_close($ch);
-		return json_encode($this->headers['location']);
-	}
+        return json_encode($this->headers['location']);
+    }
 
     curl_close($ch);
     return $result;
@@ -914,8 +914,7 @@ abstract class BaseFacebook
    * @param string $header The response header
    * @return int
    */
-  public function readHeaders($ch, $header)
-  {
+  public function readHeaders($ch, $header) {
     if (preg_match('#^([^:]+):(.*)$#', $header, $match)) {
       $this->headers[strtolower($match[1])] = trim($match[2]);
     }
