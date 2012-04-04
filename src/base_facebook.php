@@ -201,6 +201,13 @@ abstract class BaseFacebook
   protected $fileUploadSupport = false;
 
   /**
+   * Custom CURL options
+   *
+   * @var array
+   */
+  protected $curl_opts = array();
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
@@ -853,7 +860,7 @@ abstract class BaseFacebook
       $ch = curl_init();
     }
 
-    $opts = self::$CURL_OPTS;
+    $opts = $this->getCurlOptions();
     if ($this->getFileUploadSupport()) {
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
@@ -1219,6 +1226,26 @@ abstract class BaseFacebook
     }
 
     return $metadata;
+  }
+
+  /**
+   * Set custom CURL options.
+   *
+   * @param array $curlOptions CURL options
+   * @return BaseFacebook
+   */
+  public function setCurlOptions(array $curlOptions) {
+    $this->curl_opts = $curlOptions;
+    return $this;
+  }
+
+  /**
+   * Get CURL options (default + custom).
+   *
+   * @return array CURL options
+   */
+  public function getCurlOptions() {
+    return $this->curl_opts + self::$CURL_OPTS;
   }
 
   /**
