@@ -41,7 +41,6 @@ class FacebookApiException extends Exception
    */
   public function __construct($result) {
     $this->result = $result;
-
     $code = isset($result['error_code']) ? $result['error_code'] : 0;
 
     if (isset($result['error_description'])) {
@@ -50,6 +49,9 @@ class FacebookApiException extends Exception
     } else if (isset($result['error']) && is_array($result['error'])) {
       // OAuth 2.0 Draft 00 style
       $msg = $result['error']['message'];
+      if (isset($result['error']['code'])) {
+         $code = $result['error']['code'];
+      }
     } else if (isset($result['error_msg'])) {
       // Rest server style
       $msg = $result['error_msg'];
