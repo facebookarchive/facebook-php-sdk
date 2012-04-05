@@ -390,7 +390,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     } catch(FacebookApiException $e) {
       // means the server got the access token and didn't like it
       $msg = 'OAuthException: Invalid OAuth access token.';
-      $this->assertEquals($msg, (string) $e,
+      $this->assertEquals($msg, (string) $e->getType().': '.$e->getMessage(),
                           'Expect the invalid OAuth token message.');
     }
   }
@@ -408,7 +408,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     } catch(FacebookApiException $e) {
       // means the server got the access token and didn't like it
       $error_msg_start = 'OAuthException: Error validating access token:';
-      $this->assertTrue(strpos((string) $e, $error_msg_start) === 0,
+      $this->assertTrue(strpos((string) $e->getType().': '.$e->getMessage(), $error_msg_start) === 0,
                         'Expect the token validation error message.');
     }
   }
@@ -428,7 +428,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       // ProfileDelete means the server understood the DELETE
       $msg =
         'OAuthException: (#200) User cannot access this application';
-      $this->assertEquals($msg, (string) $e,
+      $this->assertEquals($msg, (string) $e->getType().': '.$e->getMessage(),
                           'Expect the invalid session message.');
     }
   }
