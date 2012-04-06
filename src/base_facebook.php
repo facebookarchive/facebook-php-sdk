@@ -201,6 +201,13 @@ abstract class BaseFacebook
   protected $fileUploadSupport = false;
 
   /**
+   * Custom CURL options
+   *
+   * @var array
+   */
+  protected $curl_opts = array();
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
@@ -654,6 +661,11 @@ abstract class BaseFacebook
       $user_info = $this->api('/me');
       return $user_info['id'];
     } catch (FacebookApiException $e) {
+      // Throw CURL exceptions
+      if ($e->getType() == 'CurlException') {
+        throw $e;
+      }
+
       return 0;
     }
   }
@@ -713,6 +725,11 @@ abstract class BaseFacebook
                           'redirect_uri' => $redirect_uri,
                           'code' => $code));
     } catch (FacebookApiException $e) {
+      // Throw CURL exceptions
+      if ($e->getType() == 'CurlException') {
+        throw $e;
+      }
+
       // most likely that user very recently revoked authorization.
       // In any event, we don't have an access token, so say so.
       return false;
@@ -853,7 +870,7 @@ abstract class BaseFacebook
       $ch = curl_init();
     }
 
-    $opts = self::$CURL_OPTS;
+    $opts = $this->getCurlOptions();
     if ($this->getFileUploadSupport()) {
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
@@ -1219,6 +1236,26 @@ abstract class BaseFacebook
     }
 
     return $metadata;
+  }
+
+  /**
+   * Set custom CURL options.
+   *
+   * @param array $curlOptions CURL options
+   * @return BaseFacebook
+   */
+  public function setCurlOptions(array $curlOptions) {
+    $this->curl_opts = $curlOptions;
+    return $this;
+  }
+
+  /**
+   * Get CURL options (default + custom).
+   *
+   * @return array CURL options
+   */
+  public function getCurlOptions() {
+    return $this->curl_opts + self::$CURL_OPTS;
   }
 
   /**
