@@ -661,6 +661,11 @@ abstract class BaseFacebook
       $user_info = $this->api('/me');
       return $user_info['id'];
     } catch (FacebookApiException $e) {
+      // Throw CURL exceptions
+      if ($e->getType() == 'CurlException') {
+        throw $e;
+      }
+
       return 0;
     }
   }
@@ -720,6 +725,11 @@ abstract class BaseFacebook
                           'redirect_uri' => $redirect_uri,
                           'code' => $code));
     } catch (FacebookApiException $e) {
+      // Throw CURL exceptions
+      if ($e->getType() == 'CurlException') {
+        throw $e;
+      }
+
       // most likely that user very recently revoked authorization.
       // In any event, we don't have an access token, so say so.
       return false;
