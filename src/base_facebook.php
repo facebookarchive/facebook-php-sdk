@@ -130,6 +130,7 @@ abstract class BaseFacebook
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_TIMEOUT        => 60,
     CURLOPT_USERAGENT      => 'facebook-php-3.1',
+    CURLOPT_SSLVERSION     => 3,
   );
 
   /**
