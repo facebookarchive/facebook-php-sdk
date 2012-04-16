@@ -806,7 +806,7 @@ abstract class BaseFacebook
     ), true);
 
     // results are returned, errors are thrown
-    if (is_array($result) && isset($result['error'])) {
+    if (is_array($result) && (isset($result['error']) || isset($result['error_code']))) {
       $this->throwAPIException($result);
     }
 
