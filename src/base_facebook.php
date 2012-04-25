@@ -382,11 +382,12 @@ abstract class BaseFacebook
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
-        $access_token = $this->getAccessTokenFromCode($code, '');
-        if ($access_token) {
+        $params = $this->getAccessTokenFromCode($code, '');
+        if ($params) {
           $this->setPersistentData('code', $code);
-          $this->setPersistentData('access_token', $access_token);
-          return $access_token;
+          $this->setPersistentData('access_token', $params['access_token']);
+          $this->setPersistentData('access_token_expires', time() + $params['expires']);
+          return $params['access_token'];
         }
       }
 
@@ -399,11 +400,12 @@ abstract class BaseFacebook
 
     $code = $this->getCode();
     if ($code && $code != $this->getPersistentData('code')) {
-      $access_token = $this->getAccessTokenFromCode($code);
-      if ($access_token) {
+      $params = $this->getAccessTokenFromCode($code);
+      if ($params) {
         $this->setPersistentData('code', $code);
-        $this->setPersistentData('access_token', $access_token);
-        return $access_token;
+        $this->setPersistentData('access_token', $params['access_token']);
+        $this->setPersistentData('access_token_expires', time() + $params['expires']);
+        return $params['access_token'];
       }
 
       // code was bogus, so everything based on it should be invalidated.
@@ -690,8 +692,9 @@ abstract class BaseFacebook
    * either logged in to Facebook or has granted an offline access permission.
    *
    * @param string $code An authorization code.
-   * @return mixed An access token exchanged for the authorization code, or
-   *               false if an access token could not be generated.
+   * @return mixed An associate array: "access_token" = access token exchanged for the authorization code,
+   *                                   "expires" = seconds this token is valid,__PHP_Incomplete_Class
+   *               or false if an access token could not be generated.
    */
   protected function getAccessTokenFromCode($code, $redirect_uri = null) {
     if (empty($code)) {
@@ -728,7 +731,7 @@ abstract class BaseFacebook
       return false;
     }
 
-    return $response_params['access_token'];
+    return $response_params;
   }
 
   /**
