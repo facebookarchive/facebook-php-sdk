@@ -33,14 +33,25 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::__construct in facebook.php
    */
   public function __construct($config) {
-    if (!session_id()) {
-      session_start();
+    if (php_sapi_name() !== 'cli') {
+      $this->usePhpSession = true;
+      if (!session_id()) {
+        session_start();
+      }
     }
     parent::__construct($config);
   }
 
   protected static $kSupportedKeys =
     array('state', 'code', 'access_token', 'user_id');
+  
+  protected $usePhpSession = false;
+  
+  /**
+   * Provide a location for persistent data in the case that
+   * php sessions are not being used
+   */
+  protected static $persistentData = array();
 
   /**
    * Provides the implementations of the inherited abstract
@@ -55,7 +66,11 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    $_SESSION[$session_var_name] = $value;
+    if ($this->usePhpSession) {  
+      $_SESSION[$session_var_name] = $value;
+    } else {
+      self::$persistentData[$session_var_name] = $value;
+    }
   }
 
   protected function getPersistentData($key, $default = false) {
@@ -65,8 +80,15 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    return isset($_SESSION[$session_var_name]) ?
-      $_SESSION[$session_var_name] : $default;
+    if ($this->usePhpSession) {
+      return isset($_SESSION[$session_var_name]) ?
+        $_SESSION[$session_var_name] : $default;
+    } else {
+      return isset(self::$persistentData[$session_var_name]) ?
+        self::$persistentData[$session_var_name] : $default;
+    }
+    
+    return $default;
   }
 
   protected function clearPersistentData($key) {
@@ -76,7 +98,11 @@ class Facebook extends BaseFacebook
     }
 
     $session_var_name = $this->constructSessionVariableName($key);
-    unset($_SESSION[$session_var_name]);
+    if ($this->usePhpSession) {
+      unset($_SESSION[$session_var_name]);
+    } else {
+      unset(self::$persistentData[$session_var_name]);
+    }
   }
 
   protected function clearAllPersistentData() {
