@@ -57,6 +57,12 @@ class FacebookApiException extends Exception
       $msg = 'Unknown Error. Check getResult()';
     }
 
+    // need to make sure that $code is an int or
+    // this will throw a fatal error
+    if(!is_int($code)) {
+      $code = 0;
+    }
+    
     parent::__construct($msg, $code);
   }
 
