@@ -1062,7 +1062,10 @@ abstract class BaseFacebook
     else {
       $protocol = 'http://';
     }
-    $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    $host = isset($_SERVER['HTTP_X_FORWARDED_HOST'])
+      ? $_SERVER['HTTP_X_FORWARDED_HOST']
+      : $_SERVER['HTTP_HOST'];
+    $currentUrl = $protocol.$host.$_SERVER['REQUEST_URI'];
     $parts = parse_url($currentUrl);
 
     $query = '';
