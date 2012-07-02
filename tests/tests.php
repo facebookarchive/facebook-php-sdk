@@ -691,10 +691,8 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     } catch (FacebookApiException $e) {
       // this test is failing as the graph call is returning the wrong
       // error message
-      $this->assertTrue(strpos($e->getMessage(),
-        'Requires session when calling from a desktop app') !== false,
-        'Incorrect exception type thrown when trying to gain ' .
-        'insights for desktop app without a user access token.');
+      $this->assertEquals($e->getMessage(),
+        'An access token is required to request this resource.');
     } catch (Exception $e) {
       $this->fail('Incorrect exception type thrown when trying to gain ' .
         'insights for desktop app without a user access token.');
