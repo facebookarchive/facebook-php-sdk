@@ -819,6 +819,30 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                        'Session superglobal incorrectly populated by getUser.');
   }
 
+  public function testExceptionConstructorWithErrorCode() {
+    $code = 404;
+    $e = new FacebookApiException(array('error_code' => $code));
+    $this->assertEquals($code, $e->getCode());
+  }
+
+  public function testExceptionTypeDraft00() {
+    $error = 'foo';
+    $e = new FacebookApiException(
+      array('error' => array('type' => $error, 'message' => 'hello world')));
+    $this->assertEquals($error, $e->getType());
+  }
+
+  public function testExceptionTypeDraft10() {
+    $error = 'foo';
+    $e = new FacebookApiException(array('error' => $error));
+    $this->assertEquals($error, $e->getType());
+  }
+
+  public function testExceptionTypeDefault() {
+    $e = new FacebookApiException(array('error' => false));
+    $this->assertEquals('Exception', $e->getType());
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
