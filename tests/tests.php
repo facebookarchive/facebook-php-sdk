@@ -1009,6 +1009,29 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals($user, $stub->getUser());
   }
 
+  public function testUserFromAccessTokenPullsID() {
+    $methods_to_stub = array(
+      'getAccessToken',
+      'api',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $user = 42;
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('getAccessToken')
+      ->will($this->returnValue('at1'));
+    $stub
+      ->expects($this->once())
+      ->method('api')
+      ->will($this->returnValue(array('id' => $user)));
+    $this->assertEquals($user, $stub->getUser());
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
