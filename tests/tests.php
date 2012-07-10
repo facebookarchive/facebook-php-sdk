@@ -887,6 +887,58 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals(self::APP_ID.'|'.self::SECRET, $stub->getAccessToken());
   }
 
+  public function testInvalidCodeWillClearData() {
+    $code = 'code1';
+    $methods_to_stub = array(
+      'getCode',
+      'getAccessTokenFromCode',
+      'clearAllPersistentData',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('getCode')
+      ->will($this->returnValue($code));
+    $stub
+      ->expects($this->once())
+      ->method('getAccessTokenFromCode')
+      ->will($this->returnValue(null));
+    $stub
+      ->expects($this->once())
+      ->method('clearAllPersistentData');
+    $this->assertEquals(self::APP_ID.'|'.self::SECRET, $stub->getAccessToken());
+  }
+
+  public function testValidCodeToToken() {
+    $code = 'code1';
+    $access_token = 'at1';
+    $methods_to_stub = array(
+      'getSignedRequest',
+      'getCode',
+      'getAccessTokenFromCode',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('getCode')
+      ->will($this->returnValue($code));
+    $stub
+      ->expects($this->once())
+      ->method('getAccessTokenFromCode')
+      ->will($this->returnValueMap(array(array($code, null, $access_token))));
+    $this->assertEquals($stub->getAccessToken(), $access_token);
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
