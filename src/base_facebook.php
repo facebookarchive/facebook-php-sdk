@@ -146,12 +146,12 @@ abstract class BaseFacebook
    * Maps aliases to Facebook domains.
    */
   public static $DOMAIN_MAP = array(
-    'api'       => 'https://api.facebook.com/',
-    'api_video' => 'https://api-video.facebook.com/',
-    'api_read'  => 'https://api-read.facebook.com/',
-    'graph'     => 'https://graph.facebook.com/',
+    'api'         => 'https://api.facebook.com/',
+    'api_video'   => 'https://api-video.facebook.com/',
+    'api_read'    => 'https://api-read.facebook.com/',
+    'graph'       => 'https://graph.facebook.com/',
     'graph_video' => 'https://graph-video.facebook.com/',
-    'www'       => 'https://www.facebook.com/',
+    'www'         => 'https://www.facebook.com/',
   );
 
   /**
