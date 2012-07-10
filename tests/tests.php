@@ -492,8 +492,10 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $this->fail('no exception was thrown on timeout.');
     }
 
-    $this->assertEquals(
-      CURLE_OPERATION_TIMEOUTED, $exception->getCode(), 'expect timeout');
+    $code = $exception->getCode();
+    if ($code != CURLE_OPERATION_TIMEOUTED && $code != CURLE_COULDNT_CONNECT) {
+      $this->fail("Expected curl error code 7 or 28 but got: $code");
+    }
     $this->assertEquals('CurlException', $exception->getType(), 'expect type');
   }
 
