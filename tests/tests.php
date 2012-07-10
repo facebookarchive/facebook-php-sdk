@@ -860,6 +860,33 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals(self::APP_ID.'|'.self::SECRET, $stub->getAccessToken());
   }
 
+  public function testInvalidCodeInSignedRequestWillClearData() {
+    $code = 'code1';
+    $methods_to_stub = array(
+      'getSignedRequest',
+      'getAccessTokenFromCode',
+      'clearAllPersistentData',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('getSignedRequest')
+      ->will($this->returnValue(array('code' => $code)));
+    $stub
+      ->expects($this->once())
+      ->method('getAccessTokenFromCode')
+      ->will($this->returnValue(null));
+    $stub
+      ->expects($this->once())
+      ->method('clearAllPersistentData');
+    $this->assertEquals(self::APP_ID.'|'.self::SECRET, $stub->getAccessToken());
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
