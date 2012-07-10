@@ -1058,6 +1058,16 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals(0, $stub->getUser());
   }
 
+  public function testEmptyCodeReturnsFalse() {
+    $fb = new FBPublicGetAccessTokenFromCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $this->assertFalse($fb->publicGetAccessTokenFromCode(''));
+    $this->assertFalse($fb->publicGetAccessTokenFromCode(null));
+    $this->assertFalse($fb->publicGetAccessTokenFromCode(false));
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
@@ -1216,5 +1226,11 @@ class FBGetSignedRequestCookieFacebook extends TransientFacebook {
 
   public function publicGetSignedRequestCookieName() {
     return $this->getSignedRequestCookieName();
+  }
+}
+
+class FBPublicGetAccessTokenFromCode extends TransientFacebook {
+  public function publicGetAccessTokenFromCode($code, $redirect_uri = null) {
+    return $this->getAccessTokenFromCode($code, $redirect_uri);
   }
 }
