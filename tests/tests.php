@@ -1114,6 +1114,23 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $access_token, $stub->publicGetAccessTokenFromCode('c', ''));
   }
 
+  public function testAPIExceptionDuringCodeExchangeIsIgnored() {
+    $methods_to_stub = array(
+      '_oauthRequest',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'FBPublicGetAccessTokenFromCode', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('_oauthRequest')
+      ->will($this->throwException(new FacebookApiException(false)));
+    $this->assertFalse($stub->publicGetAccessTokenFromCode('c', ''));
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
