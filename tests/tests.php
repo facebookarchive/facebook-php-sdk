@@ -827,6 +827,17 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals($code, $e->getCode());
   }
 
+  // this happens often despite the fact that it is useless
+  public function testExceptionTypeFalse() {
+    $e = new FacebookApiException(false);
+    $this->assertEquals('Exception', $e->getType());
+  }
+
+  public function testExceptionTypeMixedDraft00() {
+    $e = new FacebookApiException(array('error' => array('message' => 'foo')));
+    $this->assertEquals('Exception', $e->getType());
+  }
+
   public function testExceptionTypeDraft00() {
     $error = 'foo';
     $e = new FacebookApiException(
@@ -843,6 +854,14 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   public function testExceptionTypeDefault() {
     $e = new FacebookApiException(array('error' => false));
     $this->assertEquals('Exception', $e->getType());
+  }
+
+  public function testExceptionToString() {
+    $e = new FacebookApiException(array(
+      'error_code' => 1,
+      'error_description' => 'foo',
+    ));
+    $this->assertEquals('Exception: 1: foo', (string) $e);
   }
 
   protected function generateMD5HashOfRandomValue() {
