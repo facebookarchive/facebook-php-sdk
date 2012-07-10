@@ -821,6 +821,27 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                        'Session superglobal incorrectly populated by getUser.');
   }
 
+  public function testGetAccessTokenUsingCodeInJsSdkCookie() {
+    $code = 'code1';
+    $access_token = 'at1';
+    $methods_to_stub = array('getSignedRequest', 'getAccessTokenFromCode');
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('getSignedRequest')
+      ->will($this->returnValue(array('code' => $code)));
+    $stub
+      ->expects($this->once())
+      ->method('getAccessTokenFromCode')
+      ->will($this->returnValueMap(array(array($code, '', $access_token))));
+    $this->assertEquals($stub->getAccessToken(), $access_token);
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
