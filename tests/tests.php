@@ -1091,6 +1091,29 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $access_token, $stub->publicGetAccessTokenFromCode('c'));
   }
 
+  public function testNullRedirectURIAllowsEmptyStringForCookie() {
+    $methods_to_stub = array(
+      '_oauthRequest',
+      'getCurrentUrl',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $access_token = 'at1';
+    $stub = $this->getMock(
+      'FBPublicGetAccessTokenFromCode', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('_oauthRequest')
+      ->will($this->returnValue("access_token=$access_token"));
+    $stub
+      ->expects($this->never())
+      ->method('getCurrentUrl');
+    $this->assertEquals(
+      $access_token, $stub->publicGetAccessTokenFromCode('c', ''));
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
