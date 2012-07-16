@@ -219,7 +219,7 @@ abstract class BaseFacebook
 
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
-      $this->state = $this->getPersistentData('state');
+      $this->state = $state;
     }
   }
 

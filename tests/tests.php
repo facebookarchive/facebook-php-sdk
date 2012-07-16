@@ -1148,6 +1148,14 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertFalse($stub->publicGetAccessTokenFromCode('c', ''));
   }
 
+  public function testExistingStateRestoredInConstructor() {
+    $fb = new FBPublicState(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $this->assertEquals(FBPublicState::STATE, $fb->publicGetState());
+  }
+
   public function testMissingAccessTokenInCodeExchangeIsIgnored() {
     $methods_to_stub = array(
       '_oauthRequest',
@@ -1329,5 +1337,19 @@ class FBGetSignedRequestCookieFacebook extends TransientFacebook {
 class FBPublicGetAccessTokenFromCode extends TransientFacebook {
   public function publicGetAccessTokenFromCode($code, $redirect_uri = null) {
     return $this->getAccessTokenFromCode($code, $redirect_uri);
+  }
+}
+
+class FBPublicState extends TransientFacebook {
+  const STATE = 'foo';
+  protected function getPersistentData($key, $default = false) {
+    if ($key === 'state') {
+      return self::STATE;
+    }
+    return parent::getPersistentData($key, $default);
+  }
+
+  public function publicGetState() {
+    return $this->state;
   }
 }
