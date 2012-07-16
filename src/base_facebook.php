@@ -1203,11 +1203,13 @@ abstract class BaseFacebook
 
         setcookie($cookie_name, '', 0, '/', $base_domain);
       } else {
+        // @codeCoverageIgnoreStart
         self::errorLog(
           'There exists a cookie that we wanted to clear that we couldn\'t '.
           'clear because headers was already sent. Make sure to do the first '.
           'API call before outputing anything'
         );
+        // @codeCoverageIgnoreEnd
       }
     }
   }

@@ -1255,6 +1255,18 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals('Exception: 1: foo', (string) $e);
   }
 
+  public function testDestroyClearsCookie() {
+    $fb = new FBGetSignedRequestCookieFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $_COOKIE[$fb->publicGetSignedRequestCookieName()] = 'foo';
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb->destroySession();
+    $this->assertFalse(
+      array_key_exists($fb->publicGetSignedRequestCookieName(), $_COOKIE));
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
