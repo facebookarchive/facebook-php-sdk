@@ -324,6 +324,14 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                         'Access token should be that for logged out users.');
   }
 
+  public function testMissingMetadataCookie() {
+    $fb = new FBMetadataCookie(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertEmpty($fb->publicGetMetadataCookie());
+  }
+
   public function testAPIForLoggedOutUsers() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,
@@ -1333,6 +1341,17 @@ class FBGetSignedRequestCookieFacebook extends TransientFacebook {
     return $this->getSignedRequestCookieName();
   }
 }
+
+class FBMetadataCookie extends TransientFacebook {
+  public function publicGetMetadataCookie() {
+    return $this->getMetadataCookie();
+  }
+
+  public function publicGetMetadataCookieName() {
+    return $this->getMetadataCookieName();
+  }
+}
+
 
 class FBPublicGetAccessTokenFromCode extends TransientFacebook {
   public function publicGetAccessTokenFromCode($code, $redirect_uri = null) {
