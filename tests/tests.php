@@ -801,6 +801,17 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                           'video.upload should go against api-video');
   }
 
+  public function testVideoUploadGraph() {
+    $facebook = new FBRecordURL(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+
+    $facebook->api('/me/videos', 'POST');
+    $this->assertContains('//graph-video.', $facebook->getRequestedURL(),
+                          '/me/videos should go against graph-video');
+  }
+
   public function testGetUserAndAccessTokenFromSession() {
     $facebook = new PersistentFBPublic(array(
                                          'appId'  => self::APP_ID,
