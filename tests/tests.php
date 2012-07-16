@@ -288,7 +288,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testGetSignedRequestFromCookie() {
-    $facebook = new FBGetSignedRequestCookieFacebook(array(
+    $facebook = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -301,7 +301,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testGetSignedRequestWithIncorrectSignature() {
-    $facebook = new FBGetSignedRequestCookieFacebook(array(
+    $facebook = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -325,7 +325,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testMissingMetadataCookie() {
-    $fb = new FBMetadataCookie(array(
+    $fb = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -333,7 +333,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testEmptyMetadataCookie() {
-    $fb = new FBMetadataCookie(array(
+    $fb = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -342,7 +342,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testMetadataCookie() {
-    $fb = new FBMetadataCookie(array(
+    $fb = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -353,7 +353,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testQuotedMetadataCookie() {
-    $fb = new FBMetadataCookie(array(
+    $fb = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -1256,7 +1256,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   public function testDestroyClearsCookie() {
-    $fb = new FBGetSignedRequestCookieFacebook(array(
+    $fb = new FBPublicCookie(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
@@ -1375,7 +1375,7 @@ class FBGetCurrentURLFacebook extends TransientFacebook {
   }
 }
 
-class FBGetSignedRequestCookieFacebook extends TransientFacebook {
+class FBPublicCookie extends TransientFacebook {
   public function publicGetSignedRequest() {
     return $this->getSignedRequest();
   }
@@ -1383,9 +1383,7 @@ class FBGetSignedRequestCookieFacebook extends TransientFacebook {
   public function publicGetSignedRequestCookieName() {
     return $this->getSignedRequestCookieName();
   }
-}
 
-class FBMetadataCookie extends TransientFacebook {
   public function publicGetMetadataCookie() {
     return $this->getMetadataCookie();
   }
