@@ -332,6 +332,15 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEmpty($fb->publicGetMetadataCookie());
   }
 
+  public function testEmptyMetadataCookie() {
+    $fb = new FBMetadataCookie(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $_COOKIE[$fb->publicGetMetadataCookieName()] = '';
+    $this->assertEmpty($fb->publicGetMetadataCookie());
+  }
+
   public function testMetadataCookie() {
     $fb = new FBMetadataCookie(array(
       'appId'  => self::APP_ID,
