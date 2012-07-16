@@ -352,6 +352,17 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals(array($key => $val), $fb->publicGetMetadataCookie());
   }
 
+  public function testQuotedMetadataCookie() {
+    $fb = new FBMetadataCookie(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = 'foo';
+    $val = '42';
+    $_COOKIE[$fb->publicGetMetadataCookieName()] = "\"$key=$val\"";
+    $this->assertEquals(array($key => $val), $fb->publicGetMetadataCookie());
+  }
+
   public function testAPIForLoggedOutUsers() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,
