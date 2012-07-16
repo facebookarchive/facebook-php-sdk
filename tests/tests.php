@@ -1261,6 +1261,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'secret' => self::SECRET,
     ));
     $_COOKIE[$fb->publicGetSignedRequestCookieName()] = 'foo';
+    $_COOKIE[$fb->publicGetMetadataCookieName()] = 'base_domain=fbrell.com';
     $_SERVER['HTTP_HOST'] = 'fbrell.com';
     $fb->destroySession();
     $this->assertFalse(
