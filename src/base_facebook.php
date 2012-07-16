@@ -544,7 +544,7 @@ abstract class BaseFacebook
       'logout.php',
       array_merge(array(
         'next' => $this->getCurrentUrl(),
-        'access_token' => $this->getAccessToken(),
+        'access_token' => $this->getUserAccessToken(),
       ), $params)
     );
   }

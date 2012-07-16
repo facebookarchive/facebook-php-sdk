@@ -649,6 +649,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $encodedUrl = rawurlencode('http://fbrell.com/examples');
     $this->assertNotNull(strpos($facebook->getLogoutUrl(), $encodedUrl),
                          'Expect the current url to exist.');
+    $this->assertFalse(strpos($facebook->getLogoutUrl(), self::SECRET));
   }
 
   public function testLoginStatusURLDefaults() {
