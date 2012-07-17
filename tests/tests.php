@@ -1352,6 +1352,21 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $stub->api(array('method' => 'foo'));
   }
 
+  public function testJsonEncodeOfNonStringParams() {
+    $foo = array(1, 2);
+    $params = array(
+      'method' => 'get',
+      'foo' => $foo,
+    );
+    $fb = new FBRecordMakeRequest(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $fb->api('/naitik', $params);
+    $requests = $fb->publicGetRequests();
+    $this->assertEquals(json_encode($foo), $requests[0]['params']['foo']);
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
@@ -1412,6 +1427,22 @@ class FBRecordURL extends TransientFacebook {
 
   public function getRequestedURL() {
     return $this->url;
+  }
+}
+
+class FBRecordMakeRequest extends TransientFacebook {
+  private $requests = array();
+
+  protected function makeRequest($url, $params, $ch=null) {
+    $this->requests[] = array(
+      'url' => $url,
+      'params' => $params,
+    );
+    return parent::makeRequest($url, $params, $ch);
+  }
+
+  public function publicGetRequests() {
+    return $this->requests;
   }
 }
 
