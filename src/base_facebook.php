@@ -754,8 +754,9 @@ abstract class BaseFacebook
       $this->throwAPIException($result);
     }
 
-    if ($params['method'] === 'auth.expireSession' ||
-        $params['method'] === 'auth.revokeAuthorization') {
+    $method = strtolower($params['method']);
+    if ($method === 'auth.expiresession' ||
+        $method === 'auth.revokeauthorization') {
       $this->destroySession();
     }
 
