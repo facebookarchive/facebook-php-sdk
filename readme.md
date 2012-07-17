@@ -2,11 +2,12 @@ Facebook PHP SDK (v.3.1.1)
 ==========================
 
 The [Facebook Platform](http://developers.facebook.com/) is
-a set of APIs that make your app more social
+a set of APIs that make your app more social.
 
-This repository contains the open source PHP SDK that allows you to access Facebook Platform from your PHP app. Except as otherwise noted, the Facebook PHP SDK
-is licensed under the Apache Licence, Version 2.0
-(http://www.apache.org/licenses/LICENSE-2.0.html)
+This repository contains the open source PHP SDK that allows you to
+access Facebook Platform from your PHP app. Except as otherwise noted,
+the Facebook PHP SDK is licensed under the Apache Licence, Version 2.0
+(http://www.apache.org/licenses/LICENSE-2.0.html).
 
 
 Usage
@@ -66,13 +67,16 @@ The tests can be executed by using this command from the base directory:
 
 Contributing
 ===========
-For us to accept contributions you will have to first have signed the [Contributor License Agreement](https://developers.facebook.com/opensource/cla).
+For us to accept contributions you will have to first have signed the
+[Contributor License Agreement](https://developers.facebook.com/opensource/cla).
 
-When commiting, keep all lines to less than 80 characters, and try to follow the existing style.
+When commiting, keep all lines to less than 80 characters, and try to
+follow the existing style.
 
 Before creating a pull request, squash your commits into a single commit.
 
-Add the comments where needed, and provide ample explanation in the commit message.
+Add the comments where needed, and provide ample explanation in the
+commit message.
 
 
 Report Issues/Bugs
@@ -80,4 +84,3 @@ Report Issues/Bugs
 [Bugs](https://developers.facebook.com/bugs)
 
 [Questions](http://facebook.stackoverflow.com)
-
