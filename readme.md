@@ -1,5 +1,3 @@
-We have created a new repository for this project: https://github.com/facebook/facebook-php-sdk.  Please update anything you have pointing at this repostory to this location before April 1, 2012.
-
 Facebook PHP SDK (v.3.1.1)
 ==========================
 
