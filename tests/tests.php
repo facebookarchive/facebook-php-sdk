@@ -1280,6 +1280,32 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       array_key_exists($fb->publicGetSignedRequestCookieName(), $_COOKIE));
   }
 
+  public function testAuthExpireSessionDestroysSession() {
+    $methods_to_stub = array(
+      '_oauthRequest',
+      'destroySession',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $key = 'foo';
+    $val = 42;
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('_oauthRequest')
+      ->will($this->returnValue("{\"$key\":$val}"));
+    $stub
+      ->expects($this->once())
+      ->method('destroySession');
+    $this->assertEquals(
+      array($key => $val),
+      $stub->api(array('method' => 'auth.expireSession'))
+    );
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
