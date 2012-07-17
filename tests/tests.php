@@ -26,6 +26,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   private static $kValidSignedRequest = '1sxR88U4SW9m6QnSxwCEw_CObqsllXhnpP5j2pxD97c.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEyODEwNTI4MDAsIm9hdXRoX3Rva2VuIjoiMTE3NzQzOTcxNjA4MTIwfDIuVlNUUWpub3hYVVNYd1RzcDB1U2g5d19fLjg2NDAwLjEyODEwNTI4MDAtMTY3Nzg0NjM4NXx4NURORHBtcy1nMUM0dUJHQVYzSVdRX2pYV0kuIiwidXNlcl9pZCI6IjE2Nzc4NDYzODUifQ';
   private static $kNonTosedSignedRequest = 'c0Ih6vYvauDwncv0n0pndr0hP0mvZaJPQDPt6Z43O0k.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiJ9';
   private static $kSignedRequestWithBogusSignature = '1sxR32U4SW9m6QnSxwCEw_CObqsllXhnpP5j2pxD97c.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEyODEwNTI4MDAsIm9hdXRoX3Rva2VuIjoiMTE3NzQzOTcxNjA4MTIwfDIuVlNUUWpub3hYVVNYd1RzcDB1U2g5d19fLjg2NDAwLjEyODEwNTI4MDAtMTY3Nzg0NjM4NXx4NURORHBtcy1nMUM0dUJHQVYzSVdRX2pYV0kuIiwidXNlcl9pZCI6IjE2Nzc4NDYzODUifQ';
+  private static $kSignedRequestWithWrongAlgo = '2--BA2TJLbWV3uBHiB7ztrA4byNm9g0Sz8cv-x9-zi8.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NmEiLCJpc3N1ZWRfYXQiOjEzNDI0ODc0ODJ9';
 
   public function testConstructor() {
     $facebook = new TransientFacebook(array(
@@ -772,6 +773,16 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $_REQUEST['signed_request'] = self::$kNonTosedSignedRequest;
     $this->assertEquals($facebook->getSignedRequest(),
       array('algorithm' => 'HMAC-SHA256'));
+  }
+
+  public function testSignedRequestWithWrongAlgo() {
+    $fb = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $payload = $fb->publicParseSignedRequest(
+      self::$kSignedRequestWithWrongAlgo);
+    $this->assertNull($payload, 'Expected nothing back.');
   }
 
   public function testBundledCACert() {
