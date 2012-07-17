@@ -752,7 +752,9 @@ abstract class BaseFacebook
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error_code'])) {
       $this->throwAPIException($result);
+      // @codeCoverageIgnoreStart
     }
+    // @codeCoverageIgnoreEnd
 
     $method = strtolower($params['method']);
     if ($method === 'auth.expiresession' ||
@@ -809,7 +811,9 @@ abstract class BaseFacebook
     // results are returned, errors are thrown
     if (is_array($result) && isset($result['error'])) {
       $this->throwAPIException($result);
+      // @codeCoverageIgnoreStart
     }
+    // @codeCoverageIgnoreEnd
 
     return $result;
   }

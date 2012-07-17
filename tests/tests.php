@@ -1332,6 +1332,26 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     );
   }
 
+  /**
+   * @expectedException FacebookAPIException
+   */
+  public function testErrorCodeFromRestAPIThrowsException() {
+    $methods_to_stub = array(
+      '_oauthRequest',
+    );
+    $constructor_args = array(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $stub = $this->getMock(
+      'TransientFacebook', $methods_to_stub, $constructor_args);
+    $stub
+      ->expects($this->once())
+      ->method('_oauthRequest')
+      ->will($this->returnValue('{"error_code": 500}'));
+    $stub->api(array('method' => 'foo'));
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
