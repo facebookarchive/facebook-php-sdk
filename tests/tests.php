@@ -785,6 +785,28 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertNull($payload, 'Expected nothing back.');
   }
 
+  public function testMakeAndParse() {
+    $fb = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $data = array('foo' => 42);
+    $sr = $fb->publicMakeSignedRequest($data);
+    $decoded = $fb->publicParseSignedRequest($sr);
+    $this->assertEquals($data['foo'], $decoded['foo']);
+  }
+
+  /**
+   * @expectedException InvalidArgumentException
+   */
+  public function testMakeSignedRequestExpectsArray() {
+    $fb = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $sr = $fb->publicMakeSignedRequest('');
+  }
+
   public function testBundledCACert() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,
@@ -1378,6 +1400,372 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals(json_encode($foo), $requests[0]['params']['foo']);
   }
 
+  public function testSessionBackedFacebook() {
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals(
+      $val,
+      $_SESSION[sprintf('fb_%s_%s', self::APP_ID, $key)]
+    );
+    $this->assertEquals(
+      $val,
+      $fb->publicGetPersistentData($key)
+    );
+  }
+
+  public function testSessionBackedFacebookIgnoresUnsupportedKey() {
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = '--invalid--';
+    $val = 'foo';
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertFalse(
+      array_key_exists(
+        sprintf('fb_%s_%s', self::APP_ID, $key),
+        $_SESSION
+      )
+    );
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testClearSessionBackedFacebook() {
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals(
+      $val,
+      $_SESSION[sprintf('fb_%s_%s', self::APP_ID, $key)]
+    );
+    $this->assertEquals(
+      $val,
+      $fb->publicGetPersistentData($key)
+    );
+    $fb->publicClearPersistentData($key);
+    $this->assertFalse(
+      array_key_exists(
+        sprintf('fb_%s_%s', self::APP_ID, $key),
+        $_SESSION
+      )
+    );
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSessionBackedFacebookIgnoresUnsupportedKeyInClear() {
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = '--invalid--';
+    $val = 'foo';
+    $session_var_name = sprintf('fb_%s_%s', self::APP_ID, $key);
+    $_SESSION[$session_var_name] = $val;
+    $fb->publicClearPersistentData($key);
+    $this->assertTrue(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testClearAllSessionBackedFacebook() {
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $session_var_name = sprintf('fb_%s_%s', self::APP_ID, $key);
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+    $fb->publicClearAllPersistentData();
+    $this->assertFalse(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedSessionBackedFacebook() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $fb->publicGetSharedSessionID(),
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedSessionBackedFacebookIgnoresUnsupportedKey() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = '--invalid--';
+    $val = 'foo';
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $fb->publicGetSharedSessionID(),
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertFalse(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedClearSessionBackedFacebook() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $fb->publicGetSharedSessionID(),
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+    $fb->publicClearPersistentData($key);
+    $this->assertFalse(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedSessionBackedFacebookIgnoresUnsupportedKeyInClear() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = '--invalid--';
+    $val = 'foo';
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $fb->publicGetSharedSessionID(),
+      self::APP_ID,
+      $key
+    );
+    $_SESSION[$session_var_name] = $val;
+    $fb->publicClearPersistentData($key);
+    $this->assertTrue(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedClearAllSessionBackedFacebook() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $fb->publicGetSharedSessionID(),
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+    $fb->publicClearAllPersistentData();
+    $this->assertFalse(array_key_exists($session_var_name, $_SESSION));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedSessionBackedFacebookIsRestored() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $shared_session_id = $fb->publicGetSharedSessionID();
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $shared_session_id,
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+
+    // check the new instance has the same data
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $this->assertEquals(
+      $shared_session_id,
+      $fb->publicGetSharedSessionID()
+    );
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+  }
+
+  public function testSharedSessionBackedFacebookIsNotRestoredWhenCorrupt() {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $key = 'state';
+    $val = 'foo';
+    $shared_session_id = $fb->publicGetSharedSessionID();
+    $session_var_name = sprintf(
+      '%s_fb_%s_%s',
+      $shared_session_id,
+      self::APP_ID,
+      $key
+    );
+    $fb->publicSetPersistentData($key, $val);
+    $this->assertEquals($val, $_SESSION[$session_var_name]);
+    $this->assertEquals($val, $fb->publicGetPersistentData($key));
+
+    // break the cookie
+    $cookie_name = $fb->publicGetSharedSessionCookieName();
+    $_COOKIE[$cookie_name] = substr($_COOKIE[$cookie_name], 1);
+
+    // check the new instance does not have the data
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $this->assertFalse($fb->publicGetPersistentData($key));
+    $this->assertNotEquals(
+      $shared_session_id,
+      $fb->publicGetSharedSessionID()
+    );
+  }
+
+  public function testHttpHost() {
+    $real = 'foo.com';
+    $_SERVER['HTTP_HOST'] = $real;
+    $_SERVER['HTTP_X_FORWARDED_HOST'] = 'evil.com';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertEquals($real, $fb->publicGetHttpHost());
+  }
+
+  public function testHttpProtocol() {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'http';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertEquals('https', $fb->publicGetHttpProtocol());
+  }
+
+  public function testHttpHostForwarded() {
+    $real = 'foo.com';
+    $_SERVER['HTTP_HOST'] = 'localhost';
+    $_SERVER['HTTP_X_FORWARDED_HOST'] = $real;
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'trustForwarded' => true,
+    ));
+    $this->assertEquals($real, $fb->publicGetHttpHost());
+  }
+
+  public function testHttpProtocolForwarded() {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'http';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'trustForwarded' => true,
+    ));
+    $this->assertEquals('http', $fb->publicGetHttpProtocol());
+  }
+
+  public function testHttpProtocolForwardedSecure() {
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] = 'https';
+    $fb = new PersistentFBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'trustForwarded' => true,
+    ));
+    $this->assertEquals('https', $fb->publicGetHttpProtocol());
+  }
+
+  /**
+   * @dataProvider provideEndsWith
+   */
+  public function testEndsWith($big, $small, $result) {
+    $this->assertEquals(
+      $result,
+      PersistentFBPublic::publicEndsWith($big, $small)
+    );
+  }
+
+  public function provideEndsWith() {
+    return array(
+      array('', '', true),
+      array('', 'a', false),
+      array('a', '', true),
+      array('a', 'b', false),
+      array('a', 'a', true),
+      array('aa', 'a', true),
+      array('ab', 'a', false),
+      array('ba', 'a', true),
+    );
+  }
+
+  /**
+   * @dataProvider provideIsAllowedDomain
+   */
+  public function testIsAllowedDomain($big, $small, $result) {
+    $this->assertEquals(
+      $result,
+      PersistentFBPublic::publicIsAllowedDomain($big, $small)
+    );
+  }
+
+  public function provideIsAllowedDomain() {
+    return array(
+      array('fbrell.com', 'fbrell.com', true),
+      array('foo.fbrell.com', 'fbrell.com', true),
+      array('foofbrell.com', 'fbrell.com', false),
+      array('evil.com', 'fbrell.com', false),
+      array('foo.fbrell.com', 'bar.fbrell.com', false),
+    );
+  }
+
   protected function generateMD5HashOfRandomValue() {
     return md5(uniqid(mt_rand(), true));
   }
@@ -1464,6 +1852,9 @@ class FBPublic extends TransientFacebook {
   public function publicParseSignedRequest($input) {
     return $this->parseSignedRequest($input);
   }
+  public function publicMakeSignedRequest($data) {
+    return $this->makeSignedRequest($data);
+  }
 }
 
 class PersistentFBPublic extends Facebook {
@@ -1473,6 +1864,42 @@ class PersistentFBPublic extends Facebook {
 
   public function publicSetPersistentData($key, $value) {
     $this->setPersistentData($key, $value);
+  }
+
+  public function publicGetPersistentData($key, $default = false) {
+    return $this->getPersistentData($key, $default);
+  }
+
+  public function publicClearPersistentData($key) {
+    return $this->clearPersistentData($key);
+  }
+
+  public function publicClearAllPersistentData() {
+    return $this->clearAllPersistentData();
+  }
+
+  public function publicGetSharedSessionID() {
+    return $this->sharedSessionID;
+  }
+
+  public static function publicIsAllowedDomain($big, $small) {
+    return self::isAllowedDomain($big, $small);
+  }
+
+  public static function publicEndsWith($big, $small) {
+    return self::endsWith($big, $small);
+  }
+
+  public function publicGetSharedSessionCookieName() {
+    return $this->getSharedSessionCookieName();
+  }
+
+  public function publicGetHttpHost() {
+    return $this->getHttpHost();
+  }
+
+  public function publicGetHttpProtocol() {
+    return $this->getHttpProtocol();
   }
 }
 
