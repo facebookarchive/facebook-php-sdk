@@ -15,10 +15,10 @@
  * under the License.
  */
 
-if (!function_exists('curl_init')) {
+if (!extension_loaded('curl')) {
   throw new Exception('Facebook needs the CURL PHP extension.');
 }
-if (!function_exists('json_decode')) {
+if (!extension_loaded('json')) {
   throw new Exception('Facebook needs the JSON PHP extension.');
 }
 
