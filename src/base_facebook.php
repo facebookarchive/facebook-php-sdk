@@ -1123,7 +1123,7 @@ abstract class BaseFacebook
       $url .= $path;
     }
     if ($params) {
-      $url .= '?' . http_build_query($params, null, '&');
+      $url .= '?' . http_build_query($params, null, '&amp;');
     }
 
     return $url;
