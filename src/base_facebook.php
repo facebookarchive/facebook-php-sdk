@@ -231,10 +231,6 @@ abstract class BaseFacebook
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
     }
-    $state = $this->getPersistentData('state');
-    if (!empty($state)) {
-      $this->state = $state;
-    }
   }
 
   /**

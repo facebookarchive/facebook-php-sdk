@@ -51,6 +51,13 @@ class Facebook extends BaseFacebook
     parent::__construct($config);
     if (!empty($config['sharedSession'])) {
       $this->initSharedSession();
+
+      // Now that shared session is initialized (with sharedSessionID from COOKIE if any)
+      // We try to get the state.
+      $state = $this->getPersistentData('state');
+      if (!empty($state)) {
+        $this->state = $state;
+      }
     }
   }
 
