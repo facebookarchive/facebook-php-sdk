@@ -367,20 +367,20 @@ abstract class BaseFacebook
       // In any event, we don't have an access token, so say so.
       return false;
     }
-  
+
     if (empty($access_token_response)) {
       return false;
     }
-      
+
     $response_params = array();
     parse_str($access_token_response, $response_params);
-    
+
     if (!isset($response_params['access_token'])) {
       return false;
     }
-    
+
     $this->destroySession();
-    
+
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
@@ -688,7 +688,7 @@ abstract class BaseFacebook
         $this->clearPersistentData('state');
         return $_REQUEST['code'];
       } else {
-        self::errorLog('CSRF state token does not match one provided.');
+        static::errorLog('CSRF state token does not match one provided.');
         return false;
       }
     }
@@ -937,7 +937,7 @@ abstract class BaseFacebook
     $result = curl_exec($ch);
 
     if (curl_errno($ch) == 60) { // CURLE_SSL_CACERT
-      self::errorLog('Invalid or no certificate authority found, '.
+      static::errorLog('Invalid or no certificate authority found, '.
                      'using bundled information');
       curl_setopt($ch, CURLOPT_CAINFO,
                   dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
@@ -954,7 +954,7 @@ abstract class BaseFacebook
         $regex = '/Failed to connect to ([^:].*): Network is unreachable/';
         if (preg_match($regex, curl_error($ch), $matches)) {
           if (strlen(@inet_pton($matches[1])) === 16) {
-            self::errorLog('Invalid IPv6 configuration on server, '.
+            static::errorLog('Invalid IPv6 configuration on server, '.
                            'Please disable or get native IPv6 on your server.');
             self::$CURL_OPTS[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
             curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
@@ -992,7 +992,7 @@ abstract class BaseFacebook
     $data = json_decode(self::base64UrlDecode($payload), true);
 
     if (strtoupper($data['algorithm']) !== self::SIGNED_REQUEST_ALGORITHM) {
-      self::errorLog(
+      static::errorLog(
         'Unknown algorithm. Expected ' . self::SIGNED_REQUEST_ALGORITHM);
       return null;
     }
@@ -1001,7 +1001,7 @@ abstract class BaseFacebook
     $expected_sig = hash_hmac('sha256', $payload,
                               $this->getAppSecret(), $raw = true);
     if ($sig !== $expected_sig) {
-      self::errorLog('Bad Signed JSON signature!');
+      static::errorLog('Bad Signed JSON signature!');
       return null;
     }
 
@@ -1321,7 +1321,7 @@ abstract class BaseFacebook
         setcookie($cookie_name, '', 1, '/', '.'.$base_domain);
       } else {
         // @codeCoverageIgnoreStart
-        self::errorLog(
+        static::errorLog(
           'There exists a cookie that we wanted to clear that we couldn\'t '.
           'clear because headers was already sent. Make sure to do the first '.
           'API call before outputing anything.'
