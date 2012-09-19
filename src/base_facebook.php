@@ -331,9 +331,9 @@ abstract class BaseFacebook
   }
 
   /**
-   * Sets the proxy to be used when doing http requests to the rmote servers
+   * Sets the proxy to be used when doing http requests to the remote servers
    *
-   * @param string $proxyUrl The procy URL string, including scheme, username,
+   * @param string $proxyUrl The proxy URL string, including scheme, username,
    *                         password or port
    * @return BaseFacebook
    */
