@@ -367,20 +367,20 @@ abstract class BaseFacebook
       // In any event, we don't have an access token, so say so.
       return false;
     }
-  
+
     if (empty($access_token_response)) {
       return false;
     }
-      
+
     $response_params = array();
     parse_str($access_token_response, $response_params);
-    
+
     if (!isset($response_params['access_token'])) {
       return false;
     }
-    
+
     $this->destroySession();
-    
+
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
@@ -439,24 +439,25 @@ abstract class BaseFacebook
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
-        $access_token = $this->getAccessTokenFromCode($code, '');
-        if ($access_token) {
-          $this->setPersistentData('code', $code);
-          $this->setPersistentData('access_token', $access_token);
-          return $access_token;
-        }
+        $redirect_uri = '';
+      } else {
+        // signed request states there's no access token, so anything
+        // stored should be cleared.
+        $this->clearAllPersistentData();
+        return false; // respect the signed request's data, even
+                      // if there's an authorization code or something else
       }
-
-      // signed request states there's no access token, so anything
-      // stored should be cleared.
-      $this->clearAllPersistentData();
-      return false; // respect the signed request's data, even
-                    // if there's an authorization code or something else
     }
 
-    $code = $this->getCode();
+    if (!isset($code)) {
+      $code = $this->getCode();
+    }
+    if (!isset($redirect_uri)) {
+      $redirect_uri = null;
+    }
+
     if ($code && $code != $this->getPersistentData('code')) {
-      $access_token = $this->getAccessTokenFromCode($code);
+      $access_token = $this->getAccessTokenFromCode($code, $redirect_uri);
       if ($access_token) {
         $this->setPersistentData('code', $code);
         $this->setPersistentData('access_token', $access_token);
