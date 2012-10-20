@@ -349,38 +349,33 @@ abstract class BaseFacebook
    * for the workaround.
    */
   public function setExtendedAccessToken() {
-    try {
-      // need to circumvent json_decode by calling _oauthRequest
-      // directly, since response isn't JSON format.
-      $access_token_response = $this->_oauthRequest(
-        $this->getUrl('graph', '/oauth/access_token'),
-        $params = array(
-          'client_id' => $this->getAppId(),
-          'client_secret' => $this->getAppSecret(),
-          'grant_type' => 'fb_exchange_token',
-          'fb_exchange_token' => $this->getAccessToken(),
-        )
-      );
-    }
-    catch (FacebookApiException $e) {
-      // most likely that user very recently revoked authorization.
-      // In any event, we don't have an access token, so say so.
-      return false;
-    }
-  
+    // need to circumvent json_decode by calling _oauthRequest
+    // directly, since response isn't JSON format.
+    $access_token_response = $this->_oauthRequest(
+      $this->getUrl('graph', '/oauth/access_token'),
+      $params = array(
+        'client_id' => $this->getAppId(),
+        'client_secret' => $this->getAppSecret(),
+        'grant_type' => 'fb_exchange_token',
+        'fb_exchange_token' => $this->getAccessToken(),
+      )
+    );
+    // most likely that user very recently revoked authorization.
+    // In any event, we don't have an access token, so say so.
+
     if (empty($access_token_response)) {
       return false;
     }
-      
+
     $response_params = array();
     parse_str($access_token_response, $response_params);
-    
+
     if (!isset($response_params['access_token'])) {
       return false;
     }
-    
+
     $this->destroySession();
-    
+
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
@@ -707,12 +702,8 @@ abstract class BaseFacebook
    *                 if the Facebook user could not be determined.
    */
   protected function getUserFromAccessToken() {
-    try {
-      $user_info = $this->api('/me');
-      return $user_info['id'];
-    } catch (FacebookApiException $e) {
-      return 0;
-    }
+    $user_info = $this->api('/me');
+    return $user_info['id'];
   }
 
   /**
@@ -759,21 +750,15 @@ abstract class BaseFacebook
       $redirect_uri = $this->getCurrentUrl();
     }
 
-    try {
-      // need to circumvent json_decode by calling _oauthRequest
-      // directly, since response isn't JSON format.
-      $access_token_response =
-        $this->_oauthRequest(
-          $this->getUrl('graph', '/oauth/access_token'),
-          $params = array('client_id' => $this->getAppId(),
-                          'client_secret' => $this->getAppSecret(),
-                          'redirect_uri' => $redirect_uri,
-                          'code' => $code));
-    } catch (FacebookApiException $e) {
-      // most likely that user very recently revoked authorization.
-      // In any event, we don't have an access token, so say so.
-      return false;
-    }
+    // need to circumvent json_decode by calling _oauthRequest
+    // directly, since response isn't JSON format.
+    $access_token_response =
+      $this->_oauthRequest(
+        $this->getUrl('graph', '/oauth/access_token'),
+        $params = array('client_id' => $this->getAppId(),
+                        'client_secret' => $this->getAppSecret(),
+                        'redirect_uri' => $redirect_uri,
+                        'code' => $code));
 
     if (empty($access_token_response)) {
       return false;
