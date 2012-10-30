@@ -15,7 +15,10 @@
  * under the License.
  */
 
-require '../src/facebook.php';
+use Facebook\Facebook;
+use Facebook\FacebookApiException;
+
+require '../src/Facebook.php';
 
 // Create our Application instance (replace this with your appId and secret).
 $facebook = new Facebook(array(

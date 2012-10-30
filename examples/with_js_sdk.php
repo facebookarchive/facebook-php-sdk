@@ -1,6 +1,9 @@
 <?php
 
-require '../src/facebook.php';
+use Facebook\Facebook;
+use Facebook\FacebookApiException;
+
+require '../src/Facebook.php';
 
 $facebook = new Facebook(array(
   'appId'  => '344617158898614',
