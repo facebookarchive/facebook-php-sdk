@@ -16,9 +16,9 @@ Usage
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
 
-    require 'facebook-php-sdk/src/facebook.php';
+    require 'facebook-php-sdk/src/Facebook.php';
 
-    $facebook = new Facebook(array(
+    $facebook = new Facebook\Facebook(array(
       'appId'  => 'YOUR_APP_ID',
       'secret' => 'YOUR_APP_SECRET',
     ));
@@ -32,7 +32,7 @@ To make [API][API] calls:
       try {
         // Proceed knowing you have a logged in user who's authenticated.
         $user_profile = $facebook->api('/me');
-      } catch (FacebookApiException $e) {
+      } catch (Facebook\FacebookApiException $e) {
         error_log($e);
         $user = null;
       }
