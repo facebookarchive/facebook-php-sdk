@@ -15,13 +15,11 @@
  * under the License.
  */
 
-namespace Facebook;
-
 if (!function_exists('curl_init')) {
-  throw new \Exception('Facebook needs the CURL PHP extension.');
+  throw new Exception('Facebook needs the CURL PHP extension.');
 }
 if (!function_exists('json_decode')) {
-  throw new \Exception('Facebook needs the JSON PHP extension.');
+  throw new Exception('Facebook needs the JSON PHP extension.');
 }
 
 require_once __DIR__ . '/FacebookApiException.php';
@@ -936,7 +934,7 @@ abstract class BaseFacebook
    */
   protected function makeSignedRequest($data) {
     if (!is_array($data)) {
-      throw new \InvalidArgumentException(
+      throw new InvalidArgumentException(
         'makeSignedRequest expects an array. Got: ' . print_r($data, true));
     }
     $data['algorithm'] = self::SIGNED_REQUEST_ALGORITHM;

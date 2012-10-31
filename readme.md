@@ -18,7 +18,7 @@ have is:
 
     require 'facebook-php-sdk/src/Facebook.php';
 
-    $facebook = new Facebook\Facebook(array(
+    $facebook = new Facebook(array(
       'appId'  => 'YOUR_APP_ID',
       'secret' => 'YOUR_APP_SECRET',
     ));
@@ -32,7 +32,7 @@ To make [API][API] calls:
       try {
         // Proceed knowing you have a logged in user who's authenticated.
         $user_profile = $facebook->api('/me');
-      } catch (Facebook\FacebookApiException $e) {
+      } catch (FacebookApiException $e) {
         error_log($e);
         $user = null;
       }

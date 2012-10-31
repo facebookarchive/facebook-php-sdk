@@ -1,8 +1,5 @@
 <?php
 
-use Facebook\Facebook;
-use Facebook\FacebookApiException;
-
 require '../src/Facebook.php';
 
 $facebook = new Facebook(array(
