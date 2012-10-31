@@ -15,7 +15,7 @@
  * under the License.
  */
 
-require_once "base_facebook.php";
+require_once __DIR__ . '/BaseFacebook.php';
 
 /**
  * Extends the BaseFacebook class with the intent of using

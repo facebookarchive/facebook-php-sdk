@@ -1366,7 +1366,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * @expectedException FacebookAPIException
+   * @expectedException FacebookApiException
    */
   public function testErrorCodeFromRestAPIThrowsException() {
     $methods_to_stub = array(
