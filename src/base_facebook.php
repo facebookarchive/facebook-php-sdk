@@ -486,7 +486,9 @@ abstract class BaseFacebook
       if (isset($_REQUEST['signed_request'])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_REQUEST['signed_request']);
-      } else if (isset($_COOKIE[$this->getSignedRequestCookieName()])) {
+      }
+      if (!$this->signedRequest &&
+          isset($_COOKIE[$this->getSignedRequestCookieName()])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_COOKIE[$this->getSignedRequestCookieName()]);
       }
@@ -985,7 +987,14 @@ abstract class BaseFacebook
    * @return array The payload inside it or null if the sig is wrong
    */
   protected function parseSignedRequest($signed_request) {
-    list($encoded_sig, $payload) = explode('.', $signed_request, 2);
+    $signed_request_parts = explode('.', $signed_request, 2);
+    if(!isset($signed_request_parts[0]) || !isset($signed_request_parts[1])){
+      self::errorLog('Invalid signed request.');
+      return null;
+    }
+
+    $encoded_sig = $signed_request_parts[0];
+    $payload = $signed_request_parts[1];
 
     // decode the data
     $sig = self::base64UrlDecode($encoded_sig);
