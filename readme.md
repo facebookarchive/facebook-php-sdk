@@ -1,4 +1,4 @@
-Facebook PHP SDK (v.3.2.0)
+Facebook PHP SDK (v.3.2.1)
 ==========================
 
 The [Facebook Platform](http://developers.facebook.com/) is
