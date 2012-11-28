@@ -46,6 +46,10 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     return $facebook->publicMakeSignedRequest(array());
   }
 
+  private static function kSignedRequestWithEmptyValue() {
+    return '';
+  }
+
   private static function kSignedRequestWithBogusSignature() {
     $facebook = new FBPublic(array(
       'appId'  => self::APP_ID,
@@ -776,6 +780,18 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $_REQUEST['signed_request'] = self::kNonTosedSignedRequest();
     $sr = $facebook->getSignedRequest();
     $this->assertTrue(isset($sr['algorithm']));
+  }
+
+  public function testSignedRequestWithEmptyValue() {
+    $fb = new FBPublicCookie(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $_REQUEST['signed_request'] = self::kSignedRequestWithEmptyValue();
+    $this->assertNull($fb->getSignedRequest());
+    $_COOKIE[$fb->publicGetSignedRequestCookieName()] =
+      self::kSignedRequestWithEmptyValue();
+    $this->assertNull($fb->getSignedRequest());
   }
 
   public function testSignedRequestWithWrongAlgo() {
