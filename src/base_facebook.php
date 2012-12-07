@@ -439,19 +439,15 @@ abstract class BaseFacebook
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
-        $access_token = $this->getAccessTokenFromCode($code, '');
-        if ($access_token) {
-          $this->setPersistentData('code', $code);
-          $this->setPersistentData('access_token', $access_token);
-          return $access_token;
+        if ($code && $code != $this->getPersistentData('code')) {
+          $access_token = $this->getAccessTokenFromCode($code, '');
+          if ($access_token) {
+            $this->setPersistentData('code', $code);
+            $this->setPersistentData('access_token', $access_token);
+            return $access_token;
+          }
         }
       }
-
-      // signed request states there's no access token, so anything
-      // stored should be cleared.
-      $this->clearAllPersistentData();
-      return false; // respect the signed request's data, even
-                    // if there's an authorization code or something else
     }
 
     $code = $this->getCode();
