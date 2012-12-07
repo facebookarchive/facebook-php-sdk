@@ -367,20 +367,20 @@ abstract class BaseFacebook
       // In any event, we don't have an access token, so say so.
       return false;
     }
-  
+
     if (empty($access_token_response)) {
       return false;
     }
-      
+
     $response_params = array();
     parse_str($access_token_response, $response_params);
-    
+
     if (!isset($response_params['access_token'])) {
       return false;
     }
-    
+
     $this->destroySession();
-    
+
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
@@ -1143,8 +1143,14 @@ abstract class BaseFacebook
       }
       return 'http';
     }
+    /*apache + variants specific way of checking for https*/
     if (isset($_SERVER['HTTPS']) &&
         ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) {
+      return 'https';
+    }
+    /*nginx way of checking for https*/
+    if (isset($_SERVER['SERVER_PORT']) &&
+        ($_SERVER['SERVER_PORT'] === '443')) {
       return 'https';
     }
     return 'http';
