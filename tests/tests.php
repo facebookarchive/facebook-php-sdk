@@ -1433,7 +1433,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $stub->api(array('method' => 'foo'));
   }
 
-  public function testJsonEncodeOfNonStringParams() {
+  public function testNonStringParams() {
     $foo = array(1, 2);
     $params = array(
       'method' => 'get',
@@ -1445,7 +1445,26 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
     $fb->api('/naitik', $params);
     $requests = $fb->publicGetRequests();
-    $this->assertEquals(json_encode($foo), $requests[0]['params']['foo']);
+    $expectedResult = http_build_query(array('foo' => $foo), null, '&');
+    $this->assertContains($expectedResult, $requests[0]['url']);
+  }
+
+  public function testMultiFqlQueryParams() {
+    $queries = array(
+        'first_name' => 'SELECT first_name FROM user WHERE uid = 4',
+        'last_name' => 'SELECT last_name FROM user WHERE uid = 4',
+    );
+    $params = array(
+      'method' => 'get',
+      'q' => $queries
+    );
+    $fb = new FBRecordMakeRequest(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $fb->api('/fql', $params);
+    $requests = $fb->publicGetRequests();
+    $this->assertEquals(json_encode($queries), $requests[0]['params']['q']);
   }
 
   public function testSessionBackedFacebook() {
@@ -2032,3 +2051,4 @@ class FBPublicState extends TransientFacebook {
     return $this->state;
   }
 }
+
