@@ -843,6 +843,20 @@ abstract class BaseFacebook
   }
 
   /**
+   * Return true if this is a FQL query.
+   *
+   * @param string $path The path
+   *
+   * @return boolean true if this is a FQL query
+   */
+  protected function isFqlQuery($path) {
+    if (preg_match('/^(\/)?fql/', $path)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
    * Invoke the Graph API.
    *
    * @param string $path The path (required)
@@ -865,9 +879,18 @@ abstract class BaseFacebook
       $domainKey = 'graph';
     }
 
+    // parameters must be encoded in JSON for FQL queries only
+    if ($this->isFqlQuery($path)) {
+        $queryParams = array();
+        $postParams = $params;
+    } else {
+        $queryParams = $params;
+        $postParams = array();
+    }
+
     $result = json_decode($this->_oauthRequest(
-      $this->getUrl($domainKey, $path),
-      $params
+      $this->getUrl($domainKey, $path, $queryParams),
+      $postParams
     ), true);
 
     // results are returned, errors are thrown
@@ -1428,3 +1451,4 @@ abstract class BaseFacebook
    */
   abstract protected function clearAllPersistentData();
 }
+
