@@ -219,6 +219,7 @@ abstract class BaseFacebook
    * - appId: the application ID
    * - secret: the application secret
    * - fileUpload: (optional) boolean indicating if file uploads are enabled
+   * - curlOpts: (optional) array whith extended curl settings, like curl proxy settings
    *
    * @param array $config The application configuration
    */
@@ -234,6 +235,9 @@ abstract class BaseFacebook
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
       $this->state = $state;
+    }
+    if(isset($config['curlOpts']) && is_array($config['curlOpts']) && $config['curlOpts']){
+        self::$CURL_OPTS += $config['curlOpts'];
     }
   }
 
