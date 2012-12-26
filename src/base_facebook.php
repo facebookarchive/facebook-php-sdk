@@ -913,7 +913,7 @@ abstract class BaseFacebook
    * @throws FacebookApiException
    */
   protected function _oauthRequest($url, $params) {
-    if (!isset($params['access_token'])) {
+    if (!isset($params['access_token']) && strpos($url, 'access_token') === false) {
       $params['access_token'] = $this->getAccessToken();
     }
 
@@ -1451,4 +1451,5 @@ abstract class BaseFacebook
    */
   abstract protected function clearAllPersistentData();
 }
+
 
