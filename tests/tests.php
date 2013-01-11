@@ -1998,7 +1998,7 @@ class FBPublicCookie extends TransientFacebook {
   }
 }
 
-class FBRewrite extends PersistentFBPublic{
+class FBRewrite extends Facebook{
 
   public function uncache()
   {
