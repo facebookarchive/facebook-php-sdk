@@ -22,18 +22,20 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   const MIGRATED_APP_ID = '174236045938435';
   const MIGRATED_SECRET = '0073dce2d95c4a5c2922d1827ea0cca6';
 
-  const TEST_USER = 499834690;
+  const TEST_USER   = 499834690;
+  const TEST_USER_2 = 499835484;
 
   private static $kExpiredAccessToken = 'AAABrFmeaJjgBAIshbq5ZBqZBICsmveZCZBi6O4w9HSTkFI73VMtmkL9jLuWsZBZC9QMHvJFtSulZAqonZBRIByzGooCZC8DWr0t1M4BL9FARdQwPWPnIqCiFQ';
 
-  private static function kValidSignedRequest() {
+  private static function kValidSignedRequest($id = self::TEST_USER, $oauth_token = null) {
     $facebook = new FBPublic(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
     ));
     return $facebook->publicMakeSignedRequest(
       array(
-        'user_id' => self::TEST_USER,
+        'user_id' => $id,
+        'oauth_token' => $oauth_token
       )
     );
   }
@@ -321,7 +323,6 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     // intentionally don't set CSRF token at all
     $this->assertFalse($facebook->publicGetCode(),
                        'Expect getCode to fail, CSRF state not sent back.');
-
   }
 
   public function testGetUserFromSignedRequest() {
@@ -333,6 +334,34 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $_REQUEST['signed_request'] = self::kValidSignedRequest();
     $this->assertEquals('499834690', $facebook->getUser(),
                         'Failed to get user ID from a valid signed request.');
+  }
+
+  public function testSignedRequestRewrite(){
+    $facebook = new FBRewrite(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $_REQUEST['signed_request'] = self::kValidSignedRequest(self::TEST_USER, 'Hello sweetie');
+
+    $this->assertEquals('499834690', $facebook->getUser(),
+                        'Failed to get user ID from a valid signed request.');
+
+    $this->assertEquals('Hello sweetie', $facebook->getAccessToken(),
+                        'Failed to get access token from signed request');
+
+    $facebook->uncache();
+
+    $_REQUEST['signed_request'] = self::kValidSignedRequest(self::TEST_USER_2, 'spoilers');
+
+    $this->assertEquals('499835484', $facebook->getUser(),
+                        'Failed to get user ID from a valid signed request.');
+
+    $this->assertNotEquals('Hello sweetie', $facebook->getAccessToken(),
+                           'Failed to get access token from signed request');
+
+    $this->assertEquals('spoilers', $facebook->getAccessToken(),
+                        'Failed to get access token from signed request');
   }
 
   public function testGetSignedRequestFromCookie() {
@@ -1966,6 +1995,16 @@ class FBPublicCookie extends TransientFacebook {
 
   public function publicGetMetadataCookieName() {
     return $this->getMetadataCookieName();
+  }
+}
+
+class FBRewrite extends Facebook{
+
+  public function uncache()
+  {
+    $this->user = null;
+    $this->signedRequest = null;
+    $this->accessToken = null;
   }
 }
 
