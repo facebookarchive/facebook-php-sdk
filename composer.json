@@ -14,7 +14,8 @@
     "require": {
         "php": ">=5.2.0",
         "ext-curl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "phpunit/phpunit": "3.7.*"
     },
     "autoload": {
         "classmap": ["src"]
