@@ -1191,7 +1191,8 @@ abstract class BaseFacebook
   protected function getCurrentUrl() {
     $protocol = $this->getHttpProtocol() . '://';
     $host = $this->getHttpHost();
-    $currentUrl = $protocol.$host.$_SERVER['REQUEST_URI'];
+    $path = preg_replace("/^https?\/\/[^\/]*/", '', $_SERVER['REQUEST_URI']);
+    $currentUrl = $protocol.$host.$path;
     $parts = parse_url($currentUrl);
 
     $query = '';
