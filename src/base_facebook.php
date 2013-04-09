@@ -213,6 +213,13 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
+   * User defined CURL options
+   *
+   * @var  array
+   */
+  protected $curlOptions = array();
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
@@ -230,6 +237,9 @@ abstract class BaseFacebook
     }
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
+    }
+    if (isset($config['curlOptions']) and is_array($config['curlOptions'])) {
+      $this->setCurlOptions($config['curlOptions']);
     }
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
@@ -328,6 +338,28 @@ abstract class BaseFacebook
    */
   public function useFileUploadSupport() {
     return $this->getFileUploadSupport();
+  }
+
+  /**
+   * Set user defined CURL options for api calls.
+   *
+   * @param array $options user defined CURL options
+   * @return BaseFacebook
+   */
+  public function setCurlOptions(array $options)
+  {
+    $this->curlOptions = $options;
+    return $this;
+  }
+
+  /**
+   * Get user defined CURL options.
+   *
+   * @return array CURL options
+   */
+  public function getCurlOptions()
+  {
+    return $this->curlOptions;
   }
 
   /**
@@ -925,7 +957,7 @@ abstract class BaseFacebook
       $ch = curl_init();
     }
 
-    $opts = self::$CURL_OPTS;
+    $opts = $this->curlOptions + self::$CURL_OPTS;
     if ($this->getFileUploadSupport()) {
       $opts[CURLOPT_POSTFIELDS] = $params;
     } else {
