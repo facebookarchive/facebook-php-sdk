@@ -46,7 +46,9 @@ if ($user) {
 if ($user) {
   $logoutUrl = $facebook->getLogoutUrl();
 } else {
-  $loginUrl = $facebook->getLoginUrl();
+  $loginUrl = $facebook->getLoginUrl(); //instead of this you can also use the below method
+  //$loginUrl = $facebook->getLoginUrl(array( 'scope' => 'email,user_birthday' , ));
+  //in the scope array just add the permissions. 
 }
 
 // This call will always work since we are fetching public data.
