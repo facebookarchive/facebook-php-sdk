@@ -349,6 +349,22 @@ abstract class BaseFacebook
    * for the workaround.
    */
   public function setExtendedAccessToken() {
+    $response_params = $this->getExtendedAccessToken(); 
+
+    if (!empty($response_params) && !empty($response_params['access_token'])) {
+    $this->destroySession();
+
+    $this->setPersistentData(
+      'access_token', $response_params['access_token']
+    );
+    return true;
+      
+    }
+
+    return false;
+  }
+
+  public function getExtendedAccessToken() {
     try {
       // need to circumvent json_decode by calling _oauthRequest
       // directly, since response isn't JSON format.
@@ -365,26 +381,16 @@ abstract class BaseFacebook
     catch (FacebookApiException $e) {
       // most likely that user very recently revoked authorization.
       // In any event, we don't have an access token, so say so.
-      return false;
+      return null;
     }
 
-    if (empty($access_token_response)) {
-      return false;
+    if (!empty($access_token_response)) {
+      $response_params = array();
+      parse_str($access_token_response, $response_params);
+      return $response_params;
     }
 
-    $response_params = array();
-    parse_str($access_token_response, $response_params);
-
-    if (!isset($response_params['access_token'])) {
-      return false;
-    }
-
-    $this->destroySession();
-
-    $this->setPersistentData(
-      'access_token', $response_params['access_token']
-    );
-    return true;
+    return null;
   }
 
   /**
