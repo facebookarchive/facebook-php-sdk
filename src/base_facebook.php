@@ -384,6 +384,7 @@ abstract class BaseFacebook
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
+    return true;
   }
 
   /**
@@ -1179,8 +1180,6 @@ abstract class BaseFacebook
     }
     return $this->getHttpHost();
   }
-
-  /**
 
   /**
    * Returns the Current URL, stripping it of known FB parameters that should
