@@ -1181,8 +1181,6 @@ abstract class BaseFacebook
   }
 
   /**
-
-  /**
    * Returns the Current URL, stripping it of known FB parameters that should
    * not persist.
    *
