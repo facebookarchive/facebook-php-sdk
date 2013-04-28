@@ -841,7 +841,7 @@ abstract class BaseFacebook
    * @return boolean true if this is video post
    */
   protected function isVideoPost($path, $method = 'GET') {
-    if ($method == 'POST' && preg_match("/^(\/)(.+)(\/)(videos)$/", $path)) {
+    if ($method == 'POST' && preg_match("/^(\\/)(.+)(\\/)(videos)$/", $path)) {
       return true;
     }
     return false;
