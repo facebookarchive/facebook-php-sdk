@@ -947,8 +947,6 @@ abstract class BaseFacebook
   		
 
     	$params = http_build_query($params, null, '&');
-    	
-		$protocol=getHttpProtocol();
 		
 		$context =
 			array( 'http' =>
