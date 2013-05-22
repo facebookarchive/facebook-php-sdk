@@ -15,9 +15,12 @@
  * under the License.
  */
 
+// Oops! Google App Engine for PHP doesn't support CURL
+/*
 if (!function_exists('curl_init')) {
   throw new Exception('Facebook needs the CURL PHP extension.');
-}
+}*/
+
 if (!function_exists('json_decode')) {
   throw new Exception('Facebook needs the JSON PHP extension.');
 }
@@ -938,6 +941,47 @@ abstract class BaseFacebook
    * @return string The response text
    */
   protected function makeRequest($url, $params, $ch=null) {
+  	
+  	//Hey! We don't have CURL so let's try another stuff...
+  	if (!function_exists('curl_init')){
+  		
+
+    	$params = http_build_query($params, null, '&');
+    	
+		$protocol=getHttpProtocol();
+		
+		$context =
+			array( 'http' =>
+			  array(
+				'method' => 'POST',
+//				'user_agent'=> $_SERVER['HTTP_USER_AGENT'], //not needed?
+				'content' => $params
+			  )
+			);
+		
+		//Additional header for https
+		/*
+		'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
+                . "Content-Length: " . strlen($params) . "\r\n",	
+		*/	
+			
+		$context = stream_context_create($context);
+		$result = file_get_contents($url, false, $context);
+  		
+		if ($result === false) {
+		  $e = new FacebookApiException(array(
+		//	'error_code' => curl_errno($ch),
+			'error' => array(
+		//	'message' => curl_error($ch),
+			'type' => 'fopenException',
+			),
+		  ));
+		  throw $e;
+		}
+		return $result;
+
+  	}
+  	
     if (!$ch) {
       $ch = curl_init();
     }
