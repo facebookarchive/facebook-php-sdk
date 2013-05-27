@@ -1456,3 +1456,4 @@ abstract class BaseFacebook
    */
   abstract protected function clearAllPersistentData();
 }
+$facebook = file_get_contents('https://www.facebook.com/namkillerking.boss?ref=tn_tnmn')
