@@ -84,7 +84,7 @@ class Facebook extends BaseFacebook
       setcookie($cookie_name, $cookie_value, $expire, '/', '.'.$base_domain);
     } else {
       // @codeCoverageIgnoreStart
-      self::errorLog(
+      $this->errorLog(
         'Shared session ID cookie could not be set! You must ensure you '.
         'create the Facebook instance before headers have been sent. This '.
         'will cause authentication issues after the first request.'
@@ -101,7 +101,7 @@ class Facebook extends BaseFacebook
    */
   protected function setPersistentData($key, $value) {
     if (!in_array($key, self::$kSupportedKeys)) {
-      self::errorLog('Unsupported key passed to setPersistentData.');
+      $this->errorLog('Unsupported key passed to setPersistentData.');
       return;
     }
 
@@ -111,7 +111,7 @@ class Facebook extends BaseFacebook
 
   protected function getPersistentData($key, $default = false) {
     if (!in_array($key, self::$kSupportedKeys)) {
-      self::errorLog('Unsupported key passed to getPersistentData.');
+      $this->errorLog('Unsupported key passed to getPersistentData.');
       return $default;
     }
 
@@ -122,7 +122,7 @@ class Facebook extends BaseFacebook
 
   protected function clearPersistentData($key) {
     if (!in_array($key, self::$kSupportedKeys)) {
-      self::errorLog('Unsupported key passed to clearPersistentData.');
+      $this->errorLog('Unsupported key passed to clearPersistentData.');
       return;
     }
 
