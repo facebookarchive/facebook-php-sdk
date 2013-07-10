@@ -46,10 +46,30 @@ if ($user) {
 } else {
   $loginUrl = $facebook->getLoginUrl();
 }
+```
+
+With Composer:
+
+- Add the `"facebook/php-sdk": "@stable"` into the `require` section of your `composer.json`.
+- Run `composer install`.
+- The example will look like
+
+```php
+if (($loader = require_once __DIR__ . '/vendor/autoload.php') == null)  {
+  die('Vendor directory not found, Please run composer install.');
+}
+
+$facebook = new Facebook(array(
+  'appId'  => 'YOUR_APP_ID',
+  'secret' => 'YOUR_APP_SECRET',
+));
+
+// Get User ID
+$user = $facebook->getUser();
+```
 
 [examples]: /examples/example.php
 [API]: http://developers.facebook.com/docs/api
-```
 
 Tests
 -----
