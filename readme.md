@@ -45,7 +45,7 @@ Login or logout url will be needed depending on current user state.
       $loginUrl = $facebook->getLoginUrl();
     }
 
-[examples]: http://github.com/facebook/facebook-php-sdk/blob/master/examples/example.php
+[examples]: /examples/example.php
 [API]: http://developers.facebook.com/docs/api
 
 
