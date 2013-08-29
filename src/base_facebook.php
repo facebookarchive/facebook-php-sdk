@@ -898,7 +898,7 @@ abstract class BaseFacebook
 
     // json_encode all params values that are not strings
     foreach ($params as $key => $value) {
-      if (!is_string($value)) {
+      if (!is_string($value) and !($value instanceof CURLFile)) {
         $params[$key] = json_encode($value);
       }
     }
