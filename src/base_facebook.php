@@ -899,7 +899,7 @@ abstract class BaseFacebook
       $params['access_token'] = $this->getAccessToken();
     }
 
-    if (isset($params['access_token'])) {
+    if (isset($params['access_token']) && !isset($params['appsecret_proof'])) {
       $params['appsecret_proof'] = $this->getAppSecretProof($params['access_token']);
     }
 
