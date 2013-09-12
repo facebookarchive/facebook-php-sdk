@@ -213,6 +213,13 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
+   * Indicates whether the appsecret_proof parameter should be
+   * sent with every request.
+   * @var boolean
+   */
+  protected $disableAppSecretProof = false;
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
@@ -341,6 +348,15 @@ abstract class BaseFacebook
   public function setAccessToken($access_token) {
     $this->accessToken = $access_token;
     return $this;
+  }
+
+  /**
+   * Prevent the appsecret_proof parameter to be sent with api calls.
+   * This must be used only with the 'Require AppSecret Proof for
+   * Server API calls' app setting set to 'Disabled'.
+   */
+  public function disableAppSecretProof() {
+    $this->disableAppSecretProof = true;
   }
 
   /**
@@ -899,7 +915,7 @@ abstract class BaseFacebook
       $params['access_token'] = $this->getAccessToken();
     }
 
-    if (isset($params['access_token'])) {
+    if (!$this->disableAppSecretProof && isset($params['access_token'])) {
       $params['appsecret_proof'] = $this->getAppSecretProof($params['access_token']);
     }
 

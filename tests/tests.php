@@ -621,6 +621,21 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                        'available with a valid access token.');
   }
 
+  public function testDisableAppSecretProof() {
+    $facebook = new FBRecordMakeRequest(array(
+        'appId'  => self::APP_ID,
+        'secret' => self::SECRET,
+    ));
+    $facebook->disableAppSecretProof();
+    $facebook->api('/jerry');
+    $requests = $facebook->publicGetRequests();
+    $this->assertTrue(count($requests) > 0, 'Expected at least a request');
+    foreach($requests as $request) {
+      $params = $request['params'];
+      $this->assertFalse(array_key_exists('appsecret_proof', $params), 'appsecret_proof parameter shouldn\'t be there');
+    }
+  }
+
   public function testLoginURLDefaults() {
     $_SERVER['HTTP_HOST'] = 'fbrell.com';
     $_SERVER['REQUEST_URI'] = '/examples';
