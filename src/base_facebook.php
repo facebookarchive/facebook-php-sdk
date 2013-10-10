@@ -624,7 +624,7 @@ abstract class BaseFacebook
    * - no_user: the URL to go to if the user is not signed into facebook
    *
    * @param array $params Provide custom parameters
-   * @return string The URL for the logout flow
+   * @return string The URL for the login status flow
    */
   public function getLoginStatusUrl($params=array()) {
     return $this->getUrl(
