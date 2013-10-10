@@ -13,6 +13,7 @@ If you’re currently using the PHP SDK (v2.2.x) for authentication, you will re
      if ($session) {
        // proceed knowing you have a valid user session
      } else {
+       echo "ok";
        // proceed knowing you require user login and/or authentication
      }
 
