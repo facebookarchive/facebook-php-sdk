@@ -213,12 +213,20 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
+   * The proxy used for making requests.
+   *
+   * @var string
+   */
+  protected $proxy = null;
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
    * - appId: the application ID
    * - secret: the application secret
    * - fileUpload: (optional) boolean indicating if file uploads are enabled
+   * - proxy: (optional) http proxy (ex: http://my.proxy.host:8080)
    *
    * @param array $config The application configuration
    */
@@ -230,6 +238,9 @@ abstract class BaseFacebook
     }
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
+    }
+    if (isset($config['proxy']) && $config['proxy']) {
+      $this->setProxy($config['proxy']);
     }
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
@@ -317,6 +328,47 @@ abstract class BaseFacebook
    */
   public function getFileUploadSupport() {
     return $this->fileUploadSupport;
+  }
+
+  /**
+   * Sets the proxy to be used when doing http requests to the remote servers
+   *
+   * @param string $proxyUrl The proxy URL string, including scheme, username,
+   *                         password or port
+   * @return BaseFacebook
+   */
+  public function setProxy($proxyUrl) {
+    if(!preg_match('#^(http|socks)://#', $proxyUrl)) {
+        $proxyUrl = 'http://'.$proxyUrl;
+    }
+    $parts = parse_url($proxyUrl);
+    $this->proxy = array(
+        'host' => $parts['host'],
+        'port' => isset($parts['port']) ? $parts['port'] : 80,
+        'user' => isset($parts['user']) ? $parts['user'] : NULL,
+        'pass' => isset($parts['pass']) ? $parts['pass'] : NULL,
+        'type' => (isset($parts['scheme']) && $parts['scheme'] == 'socks') ?
+            CURLPROXY_SOCKS5 : CURLPROXY_HTTP,
+    );
+    return $this;
+  }
+
+  public function getProxy() {
+    if(!$this->proxy) {
+        return null;
+    }
+    $scheme = $this->proxy['type'] == CURLPROXY_SOCKS5 ? 'socks://' : 'http://';
+    $userpw = '';
+    if($this->proxy['user']) {
+        $userpw = $this->proxy['user'];
+        if($this->proxy['pass']) {
+            $userpw .= ':'.$this->proxy['pass'];
+        }
+        $userpw .= '@';
+    }
+    $host = $this->proxy['host'];
+    $port = $this->proxy['port'] != 80 ? '' : (':'.$this->proxy['port']);
+    return $scheme.$userpw.$host.$port;
   }
 
   /**
@@ -960,6 +1012,22 @@ abstract class BaseFacebook
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
 
+    // set proxy, if needed
+    if($this->proxy) {
+      $opts[CURLOPT_HTTPPROXYTUNNEL] = true;
+      $opts[CURLOPT_PROXY] = $this->proxy['host'];
+      if($this->proxy['user']) {
+        $userpwd = $this->proxy['user'];
+        if($this->proxy['pass']) {
+            $userpwd .= ':'.$this->proxy['pass'];
+        }
+        $opts[CURLOPT_PROXYUSERPWD] = $userpwd;
+        $opts[CURLOPT_PROXYAUTH] = CURLAUTH_BASIC | CURLAUTH_NTLM;
+      }
+      $opts[CURLOPT_PROXYPORT] = $this->proxy['port'];
+      $opts[CURLOPT_PROXYTYPE] = $this->proxy['type'];
+    }
+
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
 
@@ -1158,7 +1226,8 @@ abstract class BaseFacebook
 
   protected function getHttpHost() {
     if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-      return $_SERVER['HTTP_X_FORWARDED_HOST'];
+        $hostsStack = explode(', ', $_SERVER['HTTP_X_FORWARDED_HOST']);
+        return trim(array_pop($hostsStack));
     }
     return $_SERVER['HTTP_HOST'];
   }
