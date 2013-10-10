@@ -262,7 +262,7 @@ abstract class BaseFacebook
    *
    * @param string $apiSecret The App Secret
    * @return BaseFacebook
-   * @deprecated
+   * @deprecated Use setAppSecret instead.
    */
   public function setApiSecret($apiSecret) {
     $this->setAppSecret($apiSecret);
@@ -284,7 +284,7 @@ abstract class BaseFacebook
    * Get the App Secret.
    *
    * @return string the App Secret
-   * @deprecated
+   * @deprecated Use getAppSecret instead.
    */
   public function getApiSecret() {
     return $this->getAppSecret();
@@ -320,11 +320,10 @@ abstract class BaseFacebook
   }
 
   /**
-   * DEPRECATED! Please use getFileUploadSupport instead.
-   *
    * Get the file upload support status.
    *
    * @return boolean true if and only if the server supports file upload.
+   * @deprecated Use getFileUploadSupport instead.
    */
   public function useFileUploadSupport() {
     return $this->getFileUploadSupport();
