@@ -15,7 +15,7 @@ Usage
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
 
-    require 'facebook-php-sdk/src/facebook.php';
+    require_once 'facebook-php-sdk/src/facebook.php';
 
     $facebook = new Facebook(array(
       'appId'  => 'YOUR_APP_ID',
