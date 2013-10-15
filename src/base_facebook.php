@@ -1148,6 +1148,9 @@ abstract class BaseFacebook
       if ($path[0] === '/') {
         $path = substr($path, 1);
       }
+      else if (substr($path, 0, 8) === 'https://') {
+        $path = preg_replace('/^https:\/\/[a-z-]*\.facebook\.com\//', '', $path);
+      }
       $url .= $path;
     }
     if ($params) {
