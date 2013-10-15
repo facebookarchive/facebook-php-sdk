@@ -325,6 +325,45 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                        'Expect getCode to fail, CSRF state not sent back.');
   }
 
+  public function testPersistentCSRFState()
+  {
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $facebook->setCSRFStateToken();
+    $code = $facebook->getCSRFStateToken();
+
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertEquals($code, $facebook->publicGetState(),
+            'Persisted CSRF state token not loaded correctly');
+  }
+
+  public function testPersistentCSRFStateWithSharedSession()
+  {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $facebook->setCSRFStateToken();
+    $code = $facebook->getCSRFStateToken();
+
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+
+    $this->assertEquals($code, $facebook->publicGetState(),
+            'Persisted CSRF state token not loaded correctly with shared session');
+  }
+
   public function testGetUserFromSignedRequest() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,
@@ -1957,6 +1996,10 @@ class PersistentFBPublic extends Facebook {
 class FBCode extends Facebook {
   public function publicGetCode() {
     return $this->getCode();
+  }
+
+  public function publicGetState() {
+    return $this->state;
   }
 
   public function setCSRFStateToken() {
