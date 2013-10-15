@@ -14,40 +14,62 @@ Usage
 
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
+```php
+require 'facebook-php-sdk/src/facebook.php';
 
-    require 'facebook-php-sdk/src/facebook.php';
+$facebook = new Facebook(array(
+  'appId'  => 'YOUR_APP_ID',
+  'secret' => 'YOUR_APP_SECRET',
+));
 
-    $facebook = new Facebook(array(
-      'appId'  => 'YOUR_APP_ID',
-      'secret' => 'YOUR_APP_SECRET',
-    ));
-
-    // Get User ID
-    $user = $facebook->getUser();
+// Get User ID
+$user = $facebook->getUser();
+```
 
 To make [API][API] calls:
-
-    if ($user) {
-      try {
-        // Proceed knowing you have a logged in user who's authenticated.
-        $user_profile = $facebook->api('/me');
-      } catch (FacebookApiException $e) {
-        error_log($e);
-        $user = null;
-      }
-    }
+```php
+if ($user) {
+  try {
+    // Proceed knowing you have a logged in user who's authenticated.
+    $user_profile = $facebook->api('/me');
+  } catch (FacebookApiException $e) {
+    error_log($e);
+    $user = null;
+  }
+}
+```
 
 Login or logout url will be needed depending on current user state.
+```php
+if ($user) {
+  $logoutUrl = $facebook->getLogoutUrl();
+} else {
+  $loginUrl = $facebook->getLoginUrl();
+}
+```
 
-    if ($user) {
-      $logoutUrl = $facebook->getLogoutUrl();
-    } else {
-      $loginUrl = $facebook->getLoginUrl();
-    }
+With Composer:
 
-[examples]: http://github.com/facebook/facebook-php-sdk/blob/master/examples/example.php
+- Add the `"facebook/php-sdk": "@stable"` into the `require` section of your `composer.json`.
+- Run `composer install`.
+- The example will look like
+
+```php
+if (($loader = require_once __DIR__ . '/vendor/autoload.php') == null)  {
+  die('Vendor directory not found, Please run composer install.');
+}
+
+$facebook = new Facebook(array(
+  'appId'  => 'YOUR_APP_ID',
+  'secret' => 'YOUR_APP_SECRET',
+));
+
+// Get User ID
+$user = $facebook->getUser();
+```
+
+[examples]: /examples/example.php
 [API]: http://developers.facebook.com/docs/api
-
 
 Tests
 -----
