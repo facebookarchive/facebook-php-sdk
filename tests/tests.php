@@ -1804,6 +1804,16 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     );
   }
 
+  public function testErrorLogOverride() {
+    $fb = new FBCaptureErrorLog(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $this->assertEmpty($fb->errorLog);
+    $fb->publicParseSignedRequest(self::kSignedRequestWithWrongAlgo());
+    $this->assertNotEmpty($fb->errorLog);
+  }
+
   public function provideIsAllowedDomain() {
     return array(
       array('fbrell.com', 'fbrell.com', true),
@@ -2030,5 +2040,12 @@ class FBPublicState extends TransientFacebook {
 
   public function publicGetState() {
     return $this->state;
+  }
+}
+
+class FBCaptureErrorLog extends FBPublic {
+  public $errorLog = array();
+  protected function errorLog($msg) {
+    $this->errorLog[] = $msg;
   }
 }
