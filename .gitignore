@@ -1,1 +1,4 @@
 /coverage/
+vendor/
+composer.lock
+composer.phar
