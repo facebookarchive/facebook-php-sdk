@@ -213,6 +213,27 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
+   * ETag to be sent with "If-None-Match" header
+   *
+   * @var string
+   */
+  protected $etagSend = null;
+
+  /**
+   * ETag received from last API call
+   *
+   * @var string
+   */
+  protected $etagReceived = '';
+
+  /**
+   * True if ETag has not changed (hit), false if ETag has changed (miss)
+   * 
+   * @var boolean
+   */
+  protected $etagHit;
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
@@ -949,6 +970,19 @@ abstract class BaseFacebook
     }
     $opts[CURLOPT_URL] = $url;
 
+    // Enable header processing
+    $opts[CURLOPT_HEADER] = 1;
+
+    // ETags
+    if ($this->etagSend != null) {
+        if (isset($opts[CURLOPT_HTTPHEADER])) {
+          $opts[CURLOPT_HTTPHEADER][] = 'If-None-Match: '.$this->etagSend;
+        } else {
+          $opts[CURLOPT_HTTPHEADER] = array('If-None-Match: '.$this->etagSend);
+        }
+        $this->etagSend = null;
+    }
+
     // disable the 'Expect: 100-continue' behaviour. This causes CURL to wait
     // for 2 seconds if the server does not support this header.
     if (isset($opts[CURLOPT_HTTPHEADER])) {
@@ -1001,9 +1035,59 @@ abstract class BaseFacebook
       ));
       curl_close($ch);
       throw $e;
+    } else {
+      $info = curl_getinfo($ch);
+      if ($info['http_code'] == 304) {
+          $this->etagHit = true;
+      } else {
+          $this->etagHit = false;
+      }
+      $headers = mb_substr($result, 0, $info['header_size']);
+      $result = mb_substr($result, -$info['download_content_length']);
+
+      if (($etag_pos = strpos($headers, 'ETag: ')) !== FALSE) {
+          $etag_pos += 6;
+          $this->etagReceived = substr($headers, $etag_pos,
+                              strpos($headers, chr(10), $etag_pos)-$etag_pos-1);
+      } else {
+          $this->etagReceived = '';
+      }
     }
     curl_close($ch);
     return $result;
+  }
+
+  /**
+   * Sets ETag to be sent with the next API call.
+   * After the next API call $this->etagSend value is set to null.
+   * 
+   * @param String Etag
+   */
+  public function setETag($etag)
+  {
+    $this->etagSend = $etag;
+  }
+
+  /**
+   * Returns ETag received from the last API call.
+   * Returns empty string if the data has not changed - hit.
+   * 
+   * @return String Etag
+   */
+  public function getReceivedETag()
+  {
+    return $this->etagReceived;
+  }
+
+  /**
+   * Determines whether data has not changed (hit).
+   * When data has changed method returns false.
+   * 
+   * @return Boolean true if data has not changed - hit
+   */
+  public function isETagHit()
+  {
+    return $this->etagHit;
   }
 
   /**

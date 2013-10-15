@@ -953,6 +953,24 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                        'Session superglobal incorrectly populated by getUser.');
   }
 
+  public function testETags() {
+    $facebook = new TransientFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $query = '/zuck';
+
+    $result = $facebook->api($query);
+    $etag = $facebook->getReceivedETag();
+
+    $facebook->setETag($etag);
+    $facebook->api($query);
+    $etag_hit = $facebook->isETagHit();
+
+    $this->assertTrue($etag_hit);
+  }
+
   public function testGetAccessTokenUsingCodeInJsSdkCookie() {
     $code = 'code1';
     $access_token = 'at1';
