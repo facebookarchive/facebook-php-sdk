@@ -51,6 +51,16 @@ class Facebook extends BaseFacebook
     parent::__construct($config);
     if (!empty($config['sharedSession'])) {
       $this->initSharedSession();
+
+      // re-load the persisted state, since parent
+      // attempted to read out of non-shared cookie 
+      $state = $this->getPersistentData('state');
+      if (!empty($state)) {
+        $this->state = $state;
+      } else {
+        $this->state = null;
+      }
+ 
     }
   }
 
