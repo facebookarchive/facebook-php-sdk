@@ -2072,6 +2072,6 @@ class FBPublicState extends TransientFacebook {
   }
 
   public function publicGetState() {
-    return $this->state;
+    return $this->getState();
   }
 }

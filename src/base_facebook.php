@@ -191,6 +191,13 @@ abstract class BaseFacebook
   protected $state;
 
   /**
+   * Whether the state has been read from the persistent storage.
+   *
+   * @var boolean
+   */
+  protected $initialized = false;
+
+  /**
    * The OAuth access token received in exchange for a valid authorization
    * code.  null means the access token has yet to be determined.
    *
@@ -231,10 +238,29 @@ abstract class BaseFacebook
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
     }
-    $state = $this->getPersistentData('state');
-    if (!empty($state)) {
-      $this->state = $state;
+  }
+
+  /**
+   * @return string|null
+   */
+  protected function getState() {
+    if (! $this->initialized) {
+        $state = $this->getPersistentData('state');
+        if (!empty($state)) {
+            $this->state = $state;
+        }
+        $this->initialized = true;
     }
+
+    return $this->state;
+  }
+
+  /**
+   * @param string|null $state
+   */
+  protected function setState($state) {
+    $this->state = $state;
+    $this->initialized = true;
   }
 
   /**
@@ -591,7 +617,7 @@ abstract class BaseFacebook
       array_merge(array(
                     'client_id' => $this->getAppId(),
                     'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state' => $this->state),
+                    'state' => $this->getState()),
                   $params));
   }
 
@@ -688,12 +714,13 @@ abstract class BaseFacebook
    */
   protected function getCode() {
     if (isset($_REQUEST['code'])) {
-      if ($this->state !== null &&
+      $state = $this->getState();
+      if ($state !== null &&
           isset($_REQUEST['state']) &&
-          $this->state === $_REQUEST['state']) {
+          $state === $_REQUEST['state']) {
 
         // CSRF state has done its job, so clear it
-        $this->state = null;
+        $this->setState(null);
         $this->clearPersistentData('state');
         return $_REQUEST['code'];
       } else {
@@ -741,9 +768,10 @@ abstract class BaseFacebook
    * @return void
    */
   protected function establishCSRFTokenState() {
-    if ($this->state === null) {
-      $this->state = md5(uniqid(mt_rand(), true));
-      $this->setPersistentData('state', $this->state);
+    if ($this->getState() === null) {
+      $state = md5(uniqid(mt_rand(), true));
+      $this->setState($state);
+      $this->setPersistentData('state', $state);
     }
   }
 
