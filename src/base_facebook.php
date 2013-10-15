@@ -215,6 +215,22 @@ abstract class BaseFacebook
   /**
    * Initialize a Facebook Application.
    *
+   * @param array $config The application configuration
+   */
+  public function __construct($config) {
+    // We update the configuration
+    $this->updateConfig($config);
+
+    // We get the state from persistent data
+    $state = $this->getPersistentData('state');
+    if (!empty($state)) {
+      $this->state = $state;
+    }
+  }
+
+  /**
+   * Update the Facebook configuration
+   *
    * The configuration:
    * - appId: the application ID
    * - secret: the application secret
@@ -222,7 +238,7 @@ abstract class BaseFacebook
    *
    * @param array $config The application configuration
    */
-  public function __construct($config) {
+  public function updateConfig($config) {
     $this->setAppId($config['appId']);
     $this->setAppSecret($config['secret']);
     if (isset($config['fileUpload'])) {
@@ -230,10 +246,6 @@ abstract class BaseFacebook
     }
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
-    }
-    $state = $this->getPersistentData('state');
-    if (!empty($state)) {
-      $this->state = $state;
     }
   }
 
