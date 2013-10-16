@@ -45,7 +45,7 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::__construct in facebook.php
    */
   public function __construct($config) {
-    if (!session_id()) {
+    if (!headers_sent() && !session_id()) {
       session_start();
     }
     parent::__construct($config);
