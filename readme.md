@@ -46,6 +46,15 @@ $facebook->api('/me/feed/', 'post', array(
 ));
 ```
 
+To run an FQL query you have to pass directly the parameters in as an array, setting the `method` property to `fql.query`:
+
+```php
+$facebook->api(array(
+	'method' => 'fql.query',
+	'query'  => 'SELECT ...'
+));
+```
+
 Login or logout url will be needed depending on current user state.
 ```php
 if ($user) {
