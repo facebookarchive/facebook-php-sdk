@@ -39,6 +39,13 @@ if ($user) {
 }
 ```
 
+You can make api calls by choosing the `HTTP method` and setting optional `parameters`:
+```php
+$facebook->api('/me/feed/', 'post', array(
+	'message' => 'I want to display this message on my wall'
+));
+```
+
 Login or logout url will be needed depending on current user state.
 ```php
 if ($user) {
