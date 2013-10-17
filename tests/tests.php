@@ -105,6 +105,26 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                       'Expect file upload support to be on.');
   }
 
+  public function testConstructorCurlOptions() {
+
+    $curlOptions = array(
+      CURLOPT_PROXY => '123.123.123.123',
+    );
+
+    $facebook = new TransientFacebook(array(
+      'appId'      => self::APP_ID,
+      'secret'     => self::SECRET,
+      'curlOptions' => $curlOptions,
+    ));
+
+    $this->assertEquals($facebook->getAppId(), self::APP_ID,
+                        'Expect the App ID to be set.');
+    $this->assertEquals($facebook->getAppSecret(), self::SECRET,
+                        'Expect the API secret to be set.');
+    $this->assertEquals($curlOptions, $facebook->getCurlOptions(),
+                        'Expect the CURL options to be set.');
+  }
+
   public function testSetAppId() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,
