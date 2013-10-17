@@ -40,6 +40,14 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     );
   }
 
+  private static function kValidSignedRequestArray(array $data) {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    return $facebook->publicMakeSignedRequest($data);
+  }
+
   private static function kNonTosedSignedRequest() {
     $facebook = new FBPublic(array(
       'appId'  => self::APP_ID,
@@ -425,6 +433,54 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $_COOKIE[$facebook->publicGetSignedRequestCookieName()] =
       self::kSignedRequestWithBogusSignature();
     $this->assertNull($facebook->publicGetSignedRequest());
+  }
+
+  public function testParseSignedRequest() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertNotNull($facebook->parseSignedRequest(self::kValidSignedRequest()),
+                         'Failed to parse a valid signed request.');
+  }
+
+  public function testParseSignedRequestData() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $originalData = array(
+      'user_id'       => self::TEST_USER,
+      'arbitrary_key' => 'arbitrary value'
+    );
+
+    $data = $facebook->parseSignedRequest(self::kValidSignedRequestArray($originalData));
+
+    // Ignore values added internally
+    unset($data['algorithm'], $data['issued_at']);
+
+    $this->assertEquals($originalData, $data,
+                        'Data is missing in a parsed signed request.');
+  }
+
+  public function testParseSignedRequestWithMalformedSignedRequest() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertNull($facebook->parseSignedRequest('Malformed signed request without a dot'));
+  }
+
+  public function testParseSignedRequestWithIncorrectSignature() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertNull($facebook->parseSignedRequest(self::kSignedRequestWithBogusSignature()));
   }
 
   public function testNonUserAccessToken() {
