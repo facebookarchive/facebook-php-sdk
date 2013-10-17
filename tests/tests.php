@@ -532,6 +532,25 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $response['id'], '214707', 'should get expected id.');
   }
 
+  public function testBatchedAPIGraphCall() {
+    $facebook = new TransientFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+
+    $batch_data = array(
+      array('method' => 'GET', 'relative_url' => 4),
+      array('method' => 'GET', 'relative_url' => 5)
+    );
+
+    $response = $facebook->batch($batch_data);
+    $this->assertEquals(2, count($response));
+    $this->assertEquals(4, $response[0]['id']);
+    $this->assertEquals(5, $response[1]['id']);
+    $this->assertEquals('zuck', $response[0]['username']);
+    $this->assertEquals('ChrisHughes', $response[1]['username']);
+  }
+
   public function testGraphAPIWithBogusAccessToken() {
     $facebook = new TransientFacebook(array(
       'appId'  => self::APP_ID,

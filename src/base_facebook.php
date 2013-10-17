@@ -1404,6 +1404,31 @@ abstract class BaseFacebook
   }
 
   /**
+   * Sends a batched request to the graph api
+   * @return retval - The response body
+   */
+  public function batch($data) {
+    $endpoint = self::$DOMAIN_MAP['graph'];
+
+    $payload = json_encode($data);
+
+    $post_data = array(
+      'access_token' => $this->getAccessToken(),
+      'batch' => $payload
+    );
+
+    $responses = json_decode($this->makeRequest($endpoint,$post_data),true);
+
+    $retval = array();
+
+    foreach($responses as $response) {
+      $retval[] = json_decode($response['body'],true);
+    }
+
+    return $retval;
+  }
+
+  /**
    * Each of the following four methods should be overridden in
    * a concrete subclass, as they are in the provided Facebook class.
    * The Facebook class uses PHP sessions to provide a primitive
