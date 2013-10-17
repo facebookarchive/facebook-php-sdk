@@ -343,22 +343,45 @@ abstract class BaseFacebook
   }
 
   /**
+   * Extend an access token, to app access token used for queries like 
+   * notifications, scores.
+   */
+  public function setAppAccessToken() {
+    $queryParams = array(
+      'client_id' => $this->getAppId(),
+      'client_secret' => $this->getAppSecret(),
+      'grant_type' => 'client_credentials',
+    );
+
+    return $this->retrieveAdditionalAccessToken($queryParams);
+  }
+
+  /**
    * Extend an access token, while removing the short-lived token that might
-   * have been generated via client-side flow. Thanks to http://bit.ly/b0Pt0H
-   * for the workaround.
+   * have been generated via client-side flow.
    */
   public function setExtendedAccessToken() {
+    $queryParams = array(
+      'client_id' => $this->getAppId(),
+      'client_secret' => $this->getAppSecret(),
+      'grant_type' => 'fb_exchange_token',
+      'fb_exchange_token' => $this->getAccessToken(),
+    );
+
+    return $this->retrieveAdditionalAccessToken($queryParams);
+  }
+
+  /**
+   * Avoid repeating. Invoking ouath with params and replace access 
+   * token. Thanks to http://bit.ly/b0Pt0H * for the workaround.
+   */
+  protected function retrieveAdditionalAccessToken($params) {
     try {
       // need to circumvent json_decode by calling _oauthRequest
       // directly, since response isn't JSON format.
       $access_token_response = $this->_oauthRequest(
         $this->getUrl('graph', '/oauth/access_token'),
-        $params = array(
-          'client_id' => $this->getAppId(),
-          'client_secret' => $this->getAppSecret(),
-          'grant_type' => 'fb_exchange_token',
-          'fb_exchange_token' => $this->getAccessToken(),
-        )
+        $params
       );
     }
     catch (FacebookApiException $e) {
@@ -383,6 +406,7 @@ abstract class BaseFacebook
     $this->setPersistentData(
       'access_token', $response_params['access_token']
     );
+
   }
 
   /**
