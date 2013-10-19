@@ -42,7 +42,10 @@ class FacebookApiException extends Exception
   public function __construct($result) {
     $this->result = $result;
 
-    $code = isset($result['error_code']) ? $result['error_code'] : 0;
+    $code = 0;
+    if (isset($result['error_code']) && is_int($result['error_code'])) {
+      $code = $result['error_code'];
+    }
 
     if (isset($result['error_description'])) {
       // OAuth 2.0 Draft 10 style
