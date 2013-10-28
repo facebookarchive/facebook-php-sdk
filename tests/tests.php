@@ -1350,6 +1350,11 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals($code, $e->getCode());
   }
 
+  public function testExceptionConstructorWithInvalidErrorCode() {
+    $e = new FacebookApiException(array('error_code' => 'not an int'));
+    $this->assertEquals(0, $e->getCode());
+  }
+
   // this happens often despite the fact that it is useless
   public function testExceptionTypeFalse() {
     $e = new FacebookApiException(false);
