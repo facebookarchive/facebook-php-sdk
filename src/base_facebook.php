@@ -403,13 +403,14 @@ abstract class BaseFacebook
       return $this->accessToken;
     }
 
-    // first establish access token to be the application
-    // access token, in case we navigate to the /oauth/access_token
-    // endpoint, where SOME access token is required.
-    $this->setAccessToken($this->getApplicationAccessToken());
+    // Try the user access token first
     $user_access_token = $this->getUserAccessToken();
     if ($user_access_token) {
       $this->setAccessToken($user_access_token);
+    }
+    else {
+      // Fallback to application access token
+      $this->setAccessToken($this->getApplicationAccessToken());
     }
 
     return $this->accessToken;
@@ -426,7 +427,13 @@ abstract class BaseFacebook
    *                could not be determined.
    */
   protected function getUserAccessToken() {
-    // first, consider a signed request if it's supplied.
+    // First check if access token has been set in persistent data
+    // most likely set by setExtendedAccessToken()
+    if ($access_token = $this->getPersistentData('access_token')) {
+      return $access_token;
+    }
+
+    // then, consider a signed request if it's supplied.
     // if there is a signed request, then it alone determines
     // the access token.
     $signed_request = $this->getSignedRequest();
@@ -768,12 +775,14 @@ abstract class BaseFacebook
     try {
       // need to circumvent json_decode by calling _oauthRequest
       // directly, since response isn't JSON format.
+      // Using application access token to prevent getAccessToken() nesting
       $access_token_response =
         $this->_oauthRequest(
           $this->getUrl('graph', '/oauth/access_token'),
           $params = array('client_id' => $this->getAppId(),
                           'client_secret' => $this->getAppSecret(),
                           'redirect_uri' => $redirect_uri,
+                          'access_token' => $this->getApplicationAccessToken(),
                           'code' => $code));
     } catch (FacebookApiException $e) {
       // most likely that user very recently revoked authorization.
