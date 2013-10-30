@@ -502,6 +502,29 @@ abstract class BaseFacebook
   }
 
   /**
+   * Parse and set the given signed request
+   *
+   * @param string $rawSignedRequest The raw signed request string
+   *
+   * @return boolean true if successfully parsed & set the given signed request
+   */
+  public function setSignedRequest($rawSignedRequest) {
+
+    // Make sure the given signed request string have a '.' in it to avoid missing $payload on self::parseSignedRequest
+    if (strpos($rawSignedRequest, '.') === false) {
+      return false;
+    }
+
+    if (($signedRequest = $this->parseSignedRequest($rawSignedRequest)) === null) {
+      return false;
+    }
+
+    $this->signedRequest = $signedRequest;
+
+    return true;
+  }
+
+  /**
    * Get the UID of the connected user, or 0
    * if the Facebook user is not connected.
    *
