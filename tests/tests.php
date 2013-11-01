@@ -17,16 +17,65 @@
 
 class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   const APP_ID = '117743971608120';
-  const SECRET = '943716006e74d9b9283d4d5d8ab93204';
+  const SECRET = '9c8ea2071859659bea1246d33a9207cf';
 
   const MIGRATED_APP_ID = '174236045938435';
   const MIGRATED_SECRET = '0073dce2d95c4a5c2922d1827ea0cca6';
 
-  private static $kExpiredAccessToken = '206492729383450|2.N4RKywNPuHAey7CK56_wmg__.3600.1304560800.1-214707|6Q14AfpYi_XJB26aRQumouzJiGA';
-  private static $kValidSignedRequest = '1sxR88U4SW9m6QnSxwCEw_CObqsllXhnpP5j2pxD97c.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEyODEwNTI4MDAsIm9hdXRoX3Rva2VuIjoiMTE3NzQzOTcxNjA4MTIwfDIuVlNUUWpub3hYVVNYd1RzcDB1U2g5d19fLjg2NDAwLjEyODEwNTI4MDAtMTY3Nzg0NjM4NXx4NURORHBtcy1nMUM0dUJHQVYzSVdRX2pYV0kuIiwidXNlcl9pZCI6IjE2Nzc4NDYzODUifQ';
-  private static $kNonTosedSignedRequest = 'c0Ih6vYvauDwncv0n0pndr0hP0mvZaJPQDPt6Z43O0k.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiJ9';
-  private static $kSignedRequestWithBogusSignature = '1sxR32U4SW9m6QnSxwCEw_CObqsllXhnpP5j2pxD97c.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NiIsImV4cGlyZXMiOjEyODEwNTI4MDAsIm9hdXRoX3Rva2VuIjoiMTE3NzQzOTcxNjA4MTIwfDIuVlNUUWpub3hYVVNYd1RzcDB1U2g5d19fLjg2NDAwLjEyODEwNTI4MDAtMTY3Nzg0NjM4NXx4NURORHBtcy1nMUM0dUJHQVYzSVdRX2pYV0kuIiwidXNlcl9pZCI6IjE2Nzc4NDYzODUifQ';
-  private static $kSignedRequestWithWrongAlgo = '2--BA2TJLbWV3uBHiB7ztrA4byNm9g0Sz8cv-x9-zi8.eyJhbGdvcml0aG0iOiJITUFDLVNIQTI1NmEiLCJpc3N1ZWRfYXQiOjEzNDI0ODc0ODJ9';
+  const TEST_USER   = 499834690;
+  const TEST_USER_2 = 499835484;
+
+  private static $kExpiredAccessToken = 'AAABrFmeaJjgBAIshbq5ZBqZBICsmveZCZBi6O4w9HSTkFI73VMtmkL9jLuWsZBZC9QMHvJFtSulZAqonZBRIByzGooCZC8DWr0t1M4BL9FARdQwPWPnIqCiFQ';
+
+  private static function kValidSignedRequest($id = self::TEST_USER, $oauth_token = null) {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    return $facebook->publicMakeSignedRequest(
+      array(
+        'user_id' => $id,
+        'oauth_token' => $oauth_token
+      )
+    );
+  }
+
+  private static function kNonTosedSignedRequest() {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    return $facebook->publicMakeSignedRequest(array());
+  }
+
+  private static function kSignedRequestWithEmptyValue() {
+    return '';
+  }
+
+  private static function kSignedRequestWithBogusSignature() {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => 'bogus',
+    ));
+    return $facebook->publicMakeSignedRequest(
+      array(
+        'algorithm' => 'HMAC-SHA256',
+      )
+    );
+  }
+
+  private static function kSignedRequestWithWrongAlgo() {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $data['algorithm'] = 'foo';
+    $json = json_encode($data);
+    $b64 = $facebook->publicBase64UrlEncode($json);
+    $raw_sig = hash_hmac('sha256', $b64, self::SECRET, $raw = true);
+    $sig = $facebook->publicBase64UrlEncode($raw_sig);
+    return $sig.'.'.$b64;
+  }
 
   public function testConstructor() {
     $facebook = new TransientFacebook(array(
@@ -274,7 +323,45 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     // intentionally don't set CSRF token at all
     $this->assertFalse($facebook->publicGetCode(),
                        'Expect getCode to fail, CSRF state not sent back.');
+  }
 
+  public function testPersistentCSRFState()
+  {
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $facebook->setCSRFStateToken();
+    $code = $facebook->getCSRFStateToken();
+
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $this->assertEquals($code, $facebook->publicGetState(),
+            'Persisted CSRF state token not loaded correctly');
+  }
+
+  public function testPersistentCSRFStateWithSharedSession()
+  {
+    $_SERVER['HTTP_HOST'] = 'fbrell.com';
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+    $facebook->setCSRFStateToken();
+    $code = $facebook->getCSRFStateToken();
+
+    $facebook = new FBCode(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'sharedSession' => true,
+    ));
+
+    $this->assertEquals($code, $facebook->publicGetState(),
+            'Persisted CSRF state token not loaded correctly with shared session');
   }
 
   public function testGetUserFromSignedRequest() {
@@ -283,9 +370,37 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'secret' => self::SECRET,
     ));
 
-    $_REQUEST['signed_request'] = self::$kValidSignedRequest;
-    $this->assertEquals('1677846385', $facebook->getUser(),
+    $_REQUEST['signed_request'] = self::kValidSignedRequest();
+    $this->assertEquals('499834690', $facebook->getUser(),
                         'Failed to get user ID from a valid signed request.');
+  }
+
+  public function testSignedRequestRewrite(){
+    $facebook = new FBRewrite(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    $_REQUEST['signed_request'] = self::kValidSignedRequest(self::TEST_USER, 'Hello sweetie');
+
+    $this->assertEquals(self::TEST_USER, $facebook->getUser(),
+                        'Failed to get user ID from a valid signed request.');
+
+    $this->assertEquals('Hello sweetie', $facebook->getAccessToken(),
+                        'Failed to get access token from signed request');
+
+    $facebook->uncache();
+
+    $_REQUEST['signed_request'] = self::kValidSignedRequest(self::TEST_USER_2, 'spoilers');
+
+    $this->assertEquals(self::TEST_USER_2, $facebook->getUser(),
+                        'Failed to get user ID from a valid signed request.');
+
+    $_REQUEST['signed_request'] = null;
+    $facebook ->uncacheSignedRequest();
+
+    $this->assertNotEquals('Hello sweetie', $facebook->getAccessToken(),
+                        'Failed to clear access token');
   }
 
   public function testGetSignedRequestFromCookie() {
@@ -295,9 +410,9 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
 
     $_COOKIE[$facebook->publicGetSignedRequestCookieName()] =
-      self::$kValidSignedRequest;
+      self::kValidSignedRequest();
     $this->assertNotNull($facebook->publicGetSignedRequest());
-    $this->assertEquals('1677846385', $facebook->getUser(),
+    $this->assertEquals('499834690', $facebook->getUser(),
                         'Failed to get user ID from a valid signed request.');
   }
 
@@ -308,7 +423,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     ));
 
     $_COOKIE[$facebook->publicGetSignedRequestCookieName()] =
-      self::$kSignedRequestWithBogusSignature;
+      self::kSignedRequestWithBogusSignature();
     $this->assertNull($facebook->publicGetSignedRequest());
   }
 
@@ -450,26 +565,6 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $error_msg_start = 'OAuthException: Error validating access token:';
       $this->assertTrue(strpos((string) $e, $error_msg_start) === 0,
                         'Expect the token validation error message.');
-    }
-  }
-
-  public function testGraphAPIMethod() {
-    $facebook = new TransientFacebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-
-    try {
-      // naitik being bold about deleting his entire record....
-      // let's hope this never actually passes.
-      $response = $facebook->api('/naitik', $method = 'DELETE');
-      $this->fail('Should not get here.');
-    } catch(FacebookApiException $e) {
-      // ProfileDelete means the server understood the DELETE
-      $msg =
-        'OAuthException: (#200) User cannot access this application';
-      $this->assertEquals($msg, (string) $e,
-                          'Expect the invalid session message.');
     }
   }
 
@@ -722,26 +817,6 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                          'Expect the current url to exist.');
   }
 
-  public function testAppSecretCall() {
-    $facebook = new TransientFacebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-
-    try {
-      $response = $facebook->api('/' . self::APP_ID . '/insights');
-      $this->fail('Desktop applications need a user token for insights.');
-    } catch (FacebookApiException $e) {
-      // this test is failing as the graph call is returning the wrong
-      // error message
-      $this->assertEquals($e->getMessage(),
-        'An access token is required to request this resource.');
-    } catch (Exception $e) {
-      $this->fail('Incorrect exception type thrown when trying to gain ' .
-        'insights for desktop app without a user access token.');
-    }
-  }
-
   public function testBase64UrlEncode() {
     $input = 'Facebook rocks';
     $output = 'RmFjZWJvb2sgcm9ja3M';
@@ -754,10 +829,10 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'appId'  => self::APP_ID,
       'secret' => self::SECRET
     ));
-    $payload = $facebook->publicParseSignedRequest(self::$kValidSignedRequest);
+    $payload = $facebook->publicParseSignedRequest(self::kValidSignedRequest());
     $this->assertNotNull($payload, 'Expected token to parse');
     $this->assertEquals($facebook->getSignedRequest(), null);
-    $_REQUEST['signed_request'] = self::$kValidSignedRequest;
+    $_REQUEST['signed_request'] = self::kValidSignedRequest();
     $this->assertEquals($facebook->getSignedRequest(), $payload);
   }
 
@@ -767,12 +842,24 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'secret' => self::SECRET
     ));
     $payload = $facebook->publicParseSignedRequest(
-      self::$kNonTosedSignedRequest);
+      self::kNonTosedSignedRequest());
     $this->assertNotNull($payload, 'Expected token to parse');
     $this->assertNull($facebook->getSignedRequest());
-    $_REQUEST['signed_request'] = self::$kNonTosedSignedRequest;
-    $this->assertEquals($facebook->getSignedRequest(),
-      array('algorithm' => 'HMAC-SHA256'));
+    $_REQUEST['signed_request'] = self::kNonTosedSignedRequest();
+    $sr = $facebook->getSignedRequest();
+    $this->assertTrue(isset($sr['algorithm']));
+  }
+
+  public function testSignedRequestWithEmptyValue() {
+    $fb = new FBPublicCookie(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET
+    ));
+    $_REQUEST['signed_request'] = self::kSignedRequestWithEmptyValue();
+    $this->assertNull($fb->getSignedRequest());
+    $_COOKIE[$fb->publicGetSignedRequestCookieName()] =
+      self::kSignedRequestWithEmptyValue();
+    $this->assertNull($fb->getSignedRequest());
   }
 
   public function testSignedRequestWithWrongAlgo() {
@@ -781,7 +868,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'secret' => self::SECRET
     ));
     $payload = $fb->publicParseSignedRequest(
-      self::$kSignedRequestWithWrongAlgo);
+      self::kSignedRequestWithWrongAlgo());
     $this->assertNull($payload, 'Expected nothing back.');
   }
 
@@ -868,13 +955,13 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                                          'secret' => self::SECRET
                                        ));
 
-    $_REQUEST['signed_request'] = self::$kValidSignedRequest;
+    $_REQUEST['signed_request'] = self::kValidSignedRequest();
     $facebook->publicSetPersistentData('user_id', 41572);
     $facebook->publicSetPersistentData('access_token',
                                        self::$kExpiredAccessToken);
     $this->assertNotEquals('41572', $facebook->getUser(),
                            'Got user from session instead of signed request.');
-    $this->assertEquals('1677846385', $facebook->getUser(),
+    $this->assertEquals('499834690', $facebook->getUser(),
                         'Failed to get correct user ID from signed request.');
     $this->assertNotEquals(
       self::$kExpiredAccessToken,
@@ -1261,6 +1348,11 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
     $this->assertEquals($code, $e->getCode());
+  }
+
+  public function testExceptionConstructorWithInvalidErrorCode() {
+    $e = new FacebookApiException(array('error_code' => 'not an int'));
+    $this->assertEquals(0, $e->getCode());
   }
 
   // this happens often despite the fact that it is useless
@@ -1849,6 +1941,9 @@ class FBPublic extends TransientFacebook {
   public static function publicBase64UrlDecode($input) {
     return self::base64UrlDecode($input);
   }
+  public static function publicBase64UrlEncode($input) {
+    return self::base64UrlEncode($input);
+  }
   public function publicParseSignedRequest($input) {
     return $this->parseSignedRequest($input);
   }
@@ -1908,6 +2003,10 @@ class FBCode extends Facebook {
     return $this->getCode();
   }
 
+  public function publicGetState() {
+    return $this->state;
+  }
+
   public function setCSRFStateToken() {
     $this->establishCSRFTokenState();
   }
@@ -1944,6 +2043,20 @@ class FBPublicCookie extends TransientFacebook {
 
   public function publicGetMetadataCookieName() {
     return $this->getMetadataCookieName();
+  }
+}
+
+class FBRewrite extends Facebook{
+
+  public function uncacheSignedRequest(){
+    $this->signedRequest = null;
+  }
+
+  public function uncache()
+  {
+    $this->user = null;
+    $this->signedRequest = null;
+    $this->accessToken = null;
   }
 }
 

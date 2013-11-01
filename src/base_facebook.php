@@ -42,7 +42,10 @@ class FacebookApiException extends Exception
   public function __construct($result) {
     $this->result = $result;
 
-    $code = isset($result['error_code']) ? $result['error_code'] : 0;
+    $code = 0;
+    if (isset($result['error_code']) && is_int($result['error_code'])) {
+      $code = $result['error_code'];
+    }
 
     if (isset($result['error_description'])) {
       // OAuth 2.0 Draft 10 style
@@ -120,7 +123,7 @@ abstract class BaseFacebook
   /**
    * Version.
    */
-  const VERSION = '3.2.0';
+  const VERSION = '3.2.2';
 
   /**
    * Signed Request Algorithm.
@@ -213,20 +216,12 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
-   * The proxy used for making requests.
-   *
-   * @var string
-   */
-  protected $proxy = null;
-
-  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
    * - appId: the application ID
    * - secret: the application secret
    * - fileUpload: (optional) boolean indicating if file uploads are enabled
-   * - proxy: (optional) http proxy (ex: http://my.proxy.host:8080)
    *
    * @param array $config The application configuration
    */
@@ -238,9 +233,6 @@ abstract class BaseFacebook
     }
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
-    }
-    if (isset($config['proxy']) && $config['proxy']) {
-      $this->setProxy($config['proxy']);
     }
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
@@ -273,7 +265,7 @@ abstract class BaseFacebook
    *
    * @param string $apiSecret The App Secret
    * @return BaseFacebook
-   * @deprecated
+   * @deprecated Use setAppSecret instead.
    */
   public function setApiSecret($apiSecret) {
     $this->setAppSecret($apiSecret);
@@ -295,7 +287,7 @@ abstract class BaseFacebook
    * Get the App Secret.
    *
    * @return string the App Secret
-   * @deprecated
+   * @deprecated Use getAppSecret instead.
    */
   public function getApiSecret() {
     return $this->getAppSecret();
@@ -331,52 +323,10 @@ abstract class BaseFacebook
   }
 
   /**
-   * Sets the proxy to be used when doing http requests to the remote servers
-   *
-   * @param string $proxyUrl The proxy URL string, including scheme, username,
-   *                         password or port
-   * @return BaseFacebook
-   */
-  public function setProxy($proxyUrl) {
-    if(!preg_match('#^(http|socks)://#', $proxyUrl)) {
-        $proxyUrl = 'http://'.$proxyUrl;
-    }
-    $parts = parse_url($proxyUrl);
-    $this->proxy = array(
-        'host' => $parts['host'],
-        'port' => isset($parts['port']) ? $parts['port'] : 80,
-        'user' => isset($parts['user']) ? $parts['user'] : NULL,
-        'pass' => isset($parts['pass']) ? $parts['pass'] : NULL,
-        'type' => (isset($parts['scheme']) && $parts['scheme'] == 'socks') ?
-            CURLPROXY_SOCKS5 : CURLPROXY_HTTP,
-    );
-    return $this;
-  }
-
-  public function getProxy() {
-    if(!$this->proxy) {
-        return null;
-    }
-    $scheme = $this->proxy['type'] == CURLPROXY_SOCKS5 ? 'socks://' : 'http://';
-    $userpw = '';
-    if($this->proxy['user']) {
-        $userpw = $this->proxy['user'];
-        if($this->proxy['pass']) {
-            $userpw .= ':'.$this->proxy['pass'];
-        }
-        $userpw .= '@';
-    }
-    $host = $this->proxy['host'];
-    $port = $this->proxy['port'] != 80 ? '' : (':'.$this->proxy['port']);
-    return $scheme.$userpw.$host.$port;
-  }
-
-  /**
-   * DEPRECATED! Please use getFileUploadSupport instead.
-   *
    * Get the file upload support status.
    *
    * @return boolean true if and only if the server supports file upload.
+   * @deprecated Use getFileUploadSupport instead.
    */
   public function useFileUploadSupport() {
     return $this->getFileUploadSupport();
@@ -491,6 +441,11 @@ abstract class BaseFacebook
       // the JS SDK puts a code in with the redirect_uri of ''
       if (array_key_exists('code', $signed_request)) {
         $code = $signed_request['code'];
+        if ($code && $code == $this->getPersistentData('code')) {
+          // short-circuit if the code we have is the same as the one presented
+          return $this->getPersistentData('access_token');
+        }
+
         $access_token = $this->getAccessTokenFromCode($code, '');
         if ($access_token) {
           $this->setPersistentData('code', $code);
@@ -535,10 +490,10 @@ abstract class BaseFacebook
    */
   public function getSignedRequest() {
     if (!$this->signedRequest) {
-      if (isset($_REQUEST['signed_request'])) {
+      if (!empty($_REQUEST['signed_request'])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_REQUEST['signed_request']);
-      } else if (isset($_COOKIE[$this->getSignedRequestCookieName()])) {
+      } else if (!empty($_COOKIE[$this->getSignedRequestCookieName()])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_COOKIE[$this->getSignedRequestCookieName()]);
       }
@@ -576,6 +531,11 @@ abstract class BaseFacebook
     if ($signed_request) {
       if (array_key_exists('user_id', $signed_request)) {
         $user = $signed_request['user_id'];
+
+        if($user != $this->getPersistentData('user_id')){
+          $this->clearAllPersistentData();
+        }
+
         $this->setPersistentData('user_id', $signed_request['user_id']);
         return $user;
       }
@@ -631,11 +591,15 @@ abstract class BaseFacebook
     return $this->getUrl(
       'www',
       'dialog/oauth',
-      array_merge(array(
-                    'client_id' => $this->getAppId(),
-                    'redirect_uri' => $currentUrl, // possibly overwritten
-                    'state' => $this->state),
-                  $params));
+      array_merge(
+        array(
+          'client_id' => $this->getAppId(),
+          'redirect_uri' => $currentUrl, // possibly overwritten
+          'state' => $this->state,
+          'sdk' => 'php-sdk-'.self::VERSION
+        ),
+        $params
+      ));
   }
 
   /**
@@ -661,24 +625,14 @@ abstract class BaseFacebook
   /**
    * Get a login status URL to fetch the status from Facebook.
    *
-   * The parameters:
-   * - ok_session: the URL to go to if a session is found
-   * - no_session: the URL to go to if the user is not connected
-   * - no_user: the URL to go to if the user is not signed into facebook
-   *
    * @param array $params Provide custom parameters
    * @return string The URL for the logout flow
    */
   public function getLoginStatusUrl($params=array()) {
-    return $this->getUrl(
-      'www',
-      'extern/login_status.php',
+    return $this->getLoginUrl(
       array_merge(array(
-        'api_key' => $this->getAppId(),
-        'no_session' => $this->getCurrentUrl(),
-        'no_user' => $this->getCurrentUrl(),
-        'ok_session' => $this->getCurrentUrl(),
-        'session_version' => 3,
+        'response_type' => 'code',
+        'display' => 'none',
       ), $params)
     );
   }
@@ -774,7 +728,7 @@ abstract class BaseFacebook
    * @return string The application access token, useful for gathering
    *                public information about users and applications.
    */
-  protected function getApplicationAccessToken() {
+  public function getApplicationAccessToken() {
     return $this->appId.'|'.$this->appSecret;
   }
 
@@ -941,14 +895,31 @@ abstract class BaseFacebook
       $params['access_token'] = $this->getAccessToken();
     }
 
+    if (isset($params['access_token'])) {
+      $params['appsecret_proof'] = $this->getAppSecretProof($params['access_token']);
+    }
+
     // json_encode all params values that are not strings
     foreach ($params as $key => $value) {
-      if (!is_string($value)) {
+      if (!is_string($value) && !($value instanceof CURLFile)) {
         $params[$key] = json_encode($value);
       }
     }
 
     return $this->makeRequest($url, $params);
+  }
+
+  /**
+   * Generate a proof of App Secret
+   * This is required for all API calls originating from a server
+   * It is a sha256 hash of the access_token made using the app secret
+   *
+   * @param string $access_token The access_token to be hashed (required)
+   *
+   * @return string The sha256 hash of the access_token
+   */
+  protected function getAppSecretProof($access_token) {
+    return hash_hmac('sha256', $access_token, $this->getAppSecret());
   }
 
   /**
@@ -985,30 +956,16 @@ abstract class BaseFacebook
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
 
-    // set proxy, if needed
-    if($this->proxy) {
-      $opts[CURLOPT_HTTPPROXYTUNNEL] = true;
-      $opts[CURLOPT_PROXY] = $this->proxy['host'];
-      if($this->proxy['user']) {
-        $userpwd = $this->proxy['user'];
-        if($this->proxy['pass']) {
-            $userpwd .= ':'.$this->proxy['pass'];
-        }
-        $opts[CURLOPT_PROXYUSERPWD] = $userpwd;
-        $opts[CURLOPT_PROXYAUTH] = CURLAUTH_BASIC | CURLAUTH_NTLM;
-      }
-      $opts[CURLOPT_PROXYPORT] = $this->proxy['port'];
-      $opts[CURLOPT_PROXYTYPE] = $this->proxy['type'];
-    }
-
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
-
-    if (curl_errno($ch) == 60) { // CURLE_SSL_CACERT
+    
+    $errno = curl_errno($ch);
+    // CURLE_SSL_CACERT || CURLE_SSL_CACERT_BADFILE
+    if ($errno == 60 || $errno == 77) {
       self::errorLog('Invalid or no certificate authority found, '.
                      'using bundled information');
       curl_setopt($ch, CURLOPT_CAINFO,
-                  dirname(__FILE__) . '/fb_ca_chain_bundle.crt');
+                  dirname(__FILE__) . DIRECTORY_SEPARATOR . 'fb_ca_chain_bundle.crt');
       $result = curl_exec($ch);
     }
 
@@ -1199,8 +1156,7 @@ abstract class BaseFacebook
 
   protected function getHttpHost() {
     if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-        $hostsStack = explode(', ', $_SERVER['HTTP_X_FORWARDED_HOST']);
-        return trim(array_pop($hostsStack));
+      return $_SERVER['HTTP_X_FORWARDED_HOST'];
     }
     return $_SERVER['HTTP_HOST'];
   }
@@ -1212,8 +1168,14 @@ abstract class BaseFacebook
       }
       return 'http';
     }
+    /*apache + variants specific way of checking for https*/
     if (isset($_SERVER['HTTPS']) &&
         ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) {
+      return 'https';
+    }
+    /*nginx way of checking for https*/
+    if (isset($_SERVER['SERVER_PORT']) &&
+        ($_SERVER['SERVER_PORT'] === '443')) {
       return 'https';
     }
     return 'http';
@@ -1232,8 +1194,6 @@ abstract class BaseFacebook
     }
     return $this->getHttpHost();
   }
-
-  /**
 
   /**
    * Returns the Current URL, stripping it of known FB parameters that should
