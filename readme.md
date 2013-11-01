@@ -39,6 +39,22 @@ if ($user) {
 }
 ```
 
+You can make api calls by choosing the `HTTP method` and setting optional `parameters`:
+```php
+$facebook->api('/me/feed/', 'post', array(
+	'message' => 'I want to display this message on my wall'
+));
+```
+
+To run an FQL query you have to pass directly the parameters in as an array, setting the `method` property to `fql.query`:
+
+```php
+$facebook->api(array(
+	'method' => 'fql.query',
+	'query'  => 'SELECT ...'
+));
+```
+
 Login or logout url will be needed depending on current user state.
 ```php
 if ($user) {
