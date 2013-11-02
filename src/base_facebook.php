@@ -1021,7 +1021,7 @@ abstract class BaseFacebook
       $result |= ord($expected_sig[$i]) ^ ord($sig[$i]);
     }
 
-    if($result == 0) {
+    if ($result == 0) {
       return $data;
     } else {
       self::errorLog('Bad Signed JSON signature!');
