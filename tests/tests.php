@@ -1305,6 +1305,31 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertFalse($stub->publicGetAccessTokenFromCode('c', ''));
   }
 
+  public function testAppsecretProofNoParams() {
+    $fb = new FBRecordMakeRequest(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $token = $fb->getAccessToken();
+    $proof = $fb->publicGetAppSecretProof($token);
+    $params = array();
+    $fb->api('/mattynoce', $params);
+    $requests = $fb->publicGetRequests();
+    $this->assertEquals($proof, $requests[0]['params']['appsecret_proof']);
+  }
+
+  public function testAppsecretProofWithParams() {
+    $fb = new FBRecordMakeRequest(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $proof = 'foo';
+    $params = array('appsecret_proof' => $proof);
+    $fb->api('/mattynoce', $params);
+    $requests = $fb->publicGetRequests();
+    $this->assertEquals($proof, $requests[0]['params']['appsecret_proof']);
+  }
+
   public function testExceptionConstructorWithErrorCode() {
     $code = 404;
     $e = new FacebookApiException(array('error_code' => $code));
@@ -1890,6 +1915,10 @@ class FBRecordMakeRequest extends TransientFacebook {
 
   public function publicGetRequests() {
     return $this->requests;
+  }
+
+  public function publicGetAppSecretProof($access_token) {
+    return $this->getAppSecretProof($access_token);
   }
 }
 
