@@ -1025,12 +1025,23 @@ abstract class BaseFacebook
     // check sig
     $expected_sig = hash_hmac('sha256', $payload,
                               $this->getAppSecret(), $raw = true);
-    if ($sig !== $expected_sig) {
+
+    if (strlen($expected_sig) !== strlen($sig)) {
       self::errorLog('Bad Signed JSON signature!');
       return null;
     }
 
-    return $data;
+    $result = 0;
+    for ($i = 0; $i < strlen($expected_sig); $i++) {
+      $result |= ord($expected_sig[$i]) ^ ord($sig[$i]);
+    }
+
+    if ($result == 0) {
+      return $data;
+    } else {
+      self::errorLog('Bad Signed JSON signature!');
+      return null;
+    }
   }
 
   /**
