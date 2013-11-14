@@ -1258,7 +1258,8 @@ abstract class BaseFacebook
    */
   protected function shouldRetainParam($param) {
     foreach (self::$DROP_QUERY_PARAMS as $drop_query_param) {
-      if (strpos($param, $drop_query_param.'=') === 0) {
+      if ($param === $drop_query_param ||
+          strpos($param, $drop_query_param.'=') === 0) {
         return false;
       }
     }
