@@ -375,7 +375,20 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
                         'Failed to get user ID from a valid signed request.');
   }
 
-  public function testSignedRequestRewrite(){
+  public function testDisallowSignedRequest() {
+    $facebook = new TransientFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+      'allowSignedRequest' => false
+    ));
+
+    $_REQUEST['signed_request'] = self::kValidSignedRequest();
+    $this->assertEquals(0, $facebook->getUser(),
+        'Should not have received valid user from signed_request.');
+  }
+
+
+    public function testSignedRequestRewrite(){
     $facebook = new FBRewrite(array(
       'appId'  => self::APP_ID,
       'secret' => self::SECRET,
