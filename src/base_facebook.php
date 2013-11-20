@@ -123,7 +123,7 @@ abstract class BaseFacebook
   /**
    * Version.
    */
-  const VERSION = '3.2.2';
+  const VERSION = '3.2.3';
 
   /**
    * Signed Request Algorithm.
@@ -216,12 +216,22 @@ abstract class BaseFacebook
   protected $trustForwarded = false;
 
   /**
+   * Indicates if signed_request is allowed in query parameters.
+   *
+   * @var boolean
+   */
+  protected $allowSignedRequest = true;
+
+  /**
    * Initialize a Facebook Application.
    *
    * The configuration:
    * - appId: the application ID
    * - secret: the application secret
    * - fileUpload: (optional) boolean indicating if file uploads are enabled
+   * - allowSignedRequest: (optional) boolean indicating if signed_request is
+   *                       allowed in query parameters or POST body.  Should be
+   *                       false for non-canvas apps.  Defaults to true.
    *
    * @param array $config The application configuration
    */
@@ -233,6 +243,10 @@ abstract class BaseFacebook
     }
     if (isset($config['trustForwarded']) && $config['trustForwarded']) {
       $this->trustForwarded = true;
+    }
+    if (isset($config['allowSignedRequest'])
+        && !$config['allowSignedRequest']) {
+        $this->allowSignedRequest = false;
     }
     $state = $this->getPersistentData('state');
     if (!empty($state)) {
@@ -490,9 +504,10 @@ abstract class BaseFacebook
    */
   public function getSignedRequest() {
     if (!$this->signedRequest) {
-      if (!empty($_REQUEST['signed_request'])) {
+      if ($this->allowSignedRequest && !empty($_REQUEST['signed_request'])) {
         $this->signedRequest = $this->parseSignedRequest(
-          $_REQUEST['signed_request']);
+          $_REQUEST['signed_request']
+        );
       } else if (!empty($_COOKIE[$this->getSignedRequestCookieName()])) {
         $this->signedRequest = $this->parseSignedRequest(
           $_COOKIE[$this->getSignedRequestCookieName()]);
@@ -1025,12 +1040,23 @@ abstract class BaseFacebook
     // check sig
     $expected_sig = hash_hmac('sha256', $payload,
                               $this->getAppSecret(), $raw = true);
-    if ($sig !== $expected_sig) {
+
+    if (strlen($expected_sig) !== strlen($sig)) {
       self::errorLog('Bad Signed JSON signature!');
       return null;
     }
 
-    return $data;
+    $result = 0;
+    for ($i = 0; $i < strlen($expected_sig); $i++) {
+      $result |= ord($expected_sig[$i]) ^ ord($sig[$i]);
+    }
+
+    if ($result == 0) {
+      return $data;
+    } else {
+      self::errorLog('Bad Signed JSON signature!');
+      return null;
+    }
   }
 
   /**
@@ -1249,7 +1275,8 @@ abstract class BaseFacebook
    */
   protected function shouldRetainParam($param) {
     foreach (self::$DROP_QUERY_PARAMS as $drop_query_param) {
-      if (strpos($param, $drop_query_param.'=') === 0) {
+      if ($param === $drop_query_param ||
+          strpos($param, $drop_query_param.'=') === 0) {
         return false;
       }
     }
