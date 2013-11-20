@@ -1183,8 +1183,9 @@ abstract class BaseFacebook
   protected function getHttpHost() {
     if ($this->trustForwarded && isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
       $forwardProxies = explode(',', $_SERVER['HTTP_X_FORWARDED_HOST']);
-      $forwardProxies = array_filter($forwardProxies);
-      return current($forwardProxies);
+      if (!empty($forwardProxies)) {
+        return $forwardProxies[0];
+      }
     }
     return $_SERVER['HTTP_HOST'];
   }
