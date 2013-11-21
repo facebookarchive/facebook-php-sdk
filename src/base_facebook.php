@@ -791,6 +791,7 @@ abstract class BaseFacebook
    *
    * @param string $code An authorization code.
    * @param string $redirect_uri Optional redirect URI. Default null
+   *
    * @return mixed An access token exchanged for the authorization code, or
    *               false if an access token could not be generated.
    */
@@ -1185,9 +1186,9 @@ abstract class BaseFacebook
   /**
    * Build the URL for given domain alias, path and parameters.
    *
-   * @param string $name The name of the domain
-   * @param string $path Optional path (without a leading slash)
-   * @param array $params Optional query parameters
+   * @param string $name   The name of the domain
+   * @param string $path   Optional path (without a leading slash)
+   * @param array  $params Optional query parameters
    *
    * @return string The URL for the given parameters
    */
@@ -1375,6 +1376,7 @@ abstract class BaseFacebook
    *   No padded =
    *
    * @param string $input base64UrlEncoded input
+   *
    * @return string The decoded string
    */
   protected static function base64UrlDecode($input) {
@@ -1459,7 +1461,7 @@ abstract class BaseFacebook
   /**
    * Finds whether the given domain is allowed or not
    *
-   * @param string $big The value to be checked against $small
+   * @param string $big   The value to be checked against $small
    * @param string $small The input string
    *
    * @return boolean Returns TRUE if $big matches $small
@@ -1474,7 +1476,7 @@ abstract class BaseFacebook
   /**
    * Checks if $big string ends with $small string
    *
-   * @param string $big The value to be checked against $small
+   * @param string $big   The value to be checked against $small
    * @param string $small The input string
    *
    * @return boolean TRUE if $big ends with $small
