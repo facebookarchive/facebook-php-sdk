@@ -829,10 +829,11 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       'appId'  => self::APP_ID,
       'secret' => self::SECRET
     ));
-    $payload = $facebook->publicParseSignedRequest(self::kValidSignedRequest());
+    $sr = self::kValidSignedRequest();
+    $payload = $facebook->publicParseSignedRequest($sr);
     $this->assertNotNull($payload, 'Expected token to parse');
     $this->assertEquals($facebook->getSignedRequest(), null);
-    $_REQUEST['signed_request'] = self::kValidSignedRequest();
+    $_REQUEST['signed_request'] = $sr;
     $this->assertEquals($facebook->getSignedRequest(), $payload);
   }
 
