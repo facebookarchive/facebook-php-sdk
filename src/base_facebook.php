@@ -709,6 +709,7 @@ abstract class BaseFacebook
         return $_REQUEST['code'];
     }
     self::errorLog('CSRF state token does not match one provided.');
+
     return false;
   }
 
