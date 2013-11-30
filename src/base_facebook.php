@@ -699,10 +699,10 @@ abstract class BaseFacebook
    *               code could not be determined.
    */
   protected function getCode() {
-    if (!isset($_REQUEST['code']) || $this->state === null) {
+    if (!isset($_REQUEST['code']) || !isset($_REQUEST['state']) || $this->state === null) {
       return false;
     }
-    if (isset($_REQUEST['state']) && $this->state === $_REQUEST['state']) {
+    if ($this->state === $_REQUEST['state']) {
         // CSRF state has done its job, so clear it
         $this->state = null;
         $this->clearPersistentData('state');
