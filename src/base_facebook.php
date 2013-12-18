@@ -23,6 +23,33 @@ if (!function_exists('json_decode')) {
 }
 
 /**
+ * Taken from http://www.php.net/manual/en/function.http-parse-headers.php#112917
+ */
+if (!function_exists('http_parse_headers')) {
+    function http_parse_headers ($raw_headers) {
+        $headers = array(); // $headers = [];
+
+        foreach (explode("\n", $raw_headers) as $i => $h) {
+            $h = explode(':', $h, 2);
+
+            if (isset($h[1])) {
+                if(!isset($headers[$h[0]])) {
+                    $headers[$h[0]] = trim($h[1]);
+                } else if(is_array($headers[$h[0]])) {
+                    $tmp = array_merge($headers[$h[0]],array(trim($h[1])));
+                    $headers[$h[0]] = $tmp;
+                } else {
+                    $tmp = array_merge(array($headers[$h[0]]),array(trim($h[1])));
+                    $headers[$h[0]] = $tmp;
+                }
+            }
+        }
+
+        return $headers;
+    }
+}
+
+/**
  * Thrown when an API call returns an exception.
  *
  * @author Naitik Shah <naitik@facebook.com>
@@ -991,6 +1018,9 @@ abstract class BaseFacebook
       $opts[CURLOPT_HTTPHEADER] = array('Expect:');
     }
 
+    // set option to get headers for response
+    $opts[CURLOPT_HEADER] = true;
+
     curl_setopt_array($ch, $opts);
     $result = curl_exec($ch);
 
@@ -1035,6 +1065,13 @@ abstract class BaseFacebook
       throw $e;
     }
     curl_close($ch);
+
+    list($rawHeaders, $result) = explode("\r\n\r\n", $result, 2);
+    $headers = http_parse_headers($rawHeaders);
+    if (isset($headers['Content-Encoding']) && $headers['Content-Encoding'] === 'gzip') {
+        $result = gzdecode($result);
+    }
+
     return $result;
   }
 
