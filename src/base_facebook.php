@@ -1046,13 +1046,21 @@ abstract class BaseFacebook
    * @return array The payload inside it or null if the sig is wrong
    */
   protected function parseSignedRequest($signed_request) {
+
+    if (!$signed_request || strpos($signed_request, '.') === false) {
+        self::errorLog('Signed request was invalid!');
+        return null;
+    }
+
     list($encoded_sig, $payload) = explode('.', $signed_request, 2);
 
     // decode the data
     $sig = self::base64UrlDecode($encoded_sig);
     $data = json_decode(self::base64UrlDecode($payload), true);
 
-    if (strtoupper($data['algorithm']) !== self::SIGNED_REQUEST_ALGORITHM) {
+    if (!isset($data['algorithm'])
+        || strtoupper($data['algorithm']) !==  self::SIGNED_REQUEST_ALGORITHM
+    ) {
       self::errorLog(
         'Unknown algorithm. Expected ' . self::SIGNED_REQUEST_ALGORITHM);
       return null;
