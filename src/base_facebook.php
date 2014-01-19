@@ -618,7 +618,7 @@ abstract class BaseFacebook
   public function getLoginUrl($params=array()) {
     $this->establishCSRFTokenState();
     // Do not need to generate current URL if it will be overwritten by user
-    $currentUrl = $params['redirect_uri'] ? '' : $this->getCurrentUrl();
+    $currentUrl = isset($params['redirect_uri']) ? $params['redirect_uri'] : $this->getCurrentUrl();
 
     // if 'scope' is passed as an array, convert to comma separated list
     $scopeParams = isset($params['scope']) ? $params['scope'] : null;
