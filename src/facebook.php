@@ -76,11 +76,11 @@ class Facebook extends BaseFacebook
 
   /**
    * Supported keys for persistent data
-   *
+   * Added expired date timestamp
    * @var array
    */
   protected static $kSupportedKeys =
-    array('state', 'code', 'access_token', 'user_id');
+    array('state', 'code', 'access_token', 'user_id', 'expires');
 
   /**
    * Initiates Shared Session
