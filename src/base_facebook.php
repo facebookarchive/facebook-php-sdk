@@ -452,6 +452,32 @@ abstract class BaseFacebook
   }
 
   /**
+   * Determines and returns the user's access token expiration date, first using
+   * the signed request if present, and then falling back on
+   * the authorization code if present.  The intent is to
+   * returns the user's access token expiration date.
+   *
+   * @return int (timestamp) An access token expire date
+   */
+  public function getExpireTime() {
+  	if ($this->accessToken == null){
+  	  $user_access_token = $this->getUserAccessToken();
+  	  if ($user_access_token) {
+  	    $this->setAccessToken($user_access_token);
+  	  }
+  	}
+  	 
+  	if ($this->expires !== null) {
+  	
+  	// we've done this already and cached it.  Just return.
+  	return $this->expires;
+  		
+  	}
+  	return $this->getPersistentData('expires');
+  	
+  }
+  
+  /**
    * Determines and returns the user access token, first using
    * the signed request if present, and then falling back on
    * the authorization code if present.  The intent is to
@@ -467,10 +493,12 @@ abstract class BaseFacebook
     // the access token.
     $signed_request = $this->getSignedRequest();
     if ($signed_request) {
-      // apps.facebook.com hands the access_token in the signed_request
+      // apps.facebook.com hands the access_token and expire date in the signed_request
+      $expire_date = $signed_request['expires'];
       if (array_key_exists('oauth_token', $signed_request)) {
         $access_token = $signed_request['oauth_token'];
         $this->setPersistentData('access_token', $access_token);
+        $this->setPersistentData('expires', $expire_date );
         return $access_token;
       }
 
@@ -483,9 +511,13 @@ abstract class BaseFacebook
         }
 
         $access_token = $this->getAccessTokenFromCode($code, '');
+        $expire_date	 = $access_token['expires'];
+        $access_token	 = $access_token['access_token'];
+        
         if ($access_token) {
           $this->setPersistentData('code', $code);
           $this->setPersistentData('access_token', $access_token);
+          $this->setPersistentData('expires', $expire_date);
           return $access_token;
         }
       }
@@ -500,9 +532,12 @@ abstract class BaseFacebook
     $code = $this->getCode();
     if ($code && $code != $this->getPersistentData('code')) {
       $access_token = $this->getAccessTokenFromCode($code);
+       $expire_date	 = $access_token['expires'];
+       $access_token	 = $access_token['access_token'];
       if ($access_token) {
         $this->setPersistentData('code', $code);
         $this->setPersistentData('access_token', $access_token);
+        $this->setPersistentData('expires', $expire_date);
         return $access_token;
       }
 
@@ -825,8 +860,12 @@ abstract class BaseFacebook
     if (!isset($response_params['access_token'])) {
       return false;
     }
-
-    return $response_params['access_token'];
+    // As expired date is returned in seconds we convert that into timestamp
+    if (!isset($response_params['expires'])){
+      $response_params['expires'] = 0;
+    }
+    $response_params['expires'] += time();
+      return $response_params;
   }
 
   /**
