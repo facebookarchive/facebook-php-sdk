@@ -16,7 +16,18 @@
  */
 
 require_once "base_facebook.php";
+$facebook->setFileUploadSupport(true);
 
+$img = '/tmp/mypic.png';
+
+$photo = $facebook->api(
+  '/me/photos', 
+  'POST',
+  array(
+    'source' => '@' . $img,
+    'message' => 'Photo uploaded via the PHP SDK!'
+  )
+);
 /**
  * Extends the BaseFacebook class with the intent of using
  * PHP sessions to store user ids and access tokens.
