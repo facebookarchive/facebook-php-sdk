@@ -1,4 +1,8 @@
 <?php
+use Facebook\BaseFacebook;
+use Facebook\Facebook;
+use Facebook\FacebookApiException;
+
 /**
  * Copyright 2011 Facebook, Inc.
  *
@@ -1497,7 +1501,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * @expectedException FacebookAPIException
+   * @expectedException Facebook\FacebookApiException
    */
   public function testErrorCodeFromRestAPIThrowsException() {
     $methods_to_stub = array(
