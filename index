@@ -1,0 +1,23 @@
+ 
+error_reporting ( 0 ) ;
+ 
+require ( 'facebook.php' ) ;
+ 
+$ Facebook  =  new  Facebook ( "a sua chave de API" , "sua chave secreta" ) ;
+ 
+$ Facebook_account  =  $ facebook -> require_login ( ) ;
+ 
+>
+ 
+< div style  =  "padding: 5px" >
+    Olá  < fb : name uid = " ? <php  echo  $ facebook_account ;  >? "  useyou = "false" / > !
+< / div >
+< div style  =  "padding: 5px" >
+    Jogue Jamag !
+< / div >
+< div style  =  "padding: 5px; background-color: black" >
+< fb : swf swfsrc = "http://games.mochiads.com/c/g/jamag/jamag_secure.swf"  swfbgcolor = "#000000"  wmode  =  "opaque"  width = "500"  height = "500"  / >
+< / div >
+< div style  =  "padding: 5px" >
+    Find out how to  embed your Flash games on Facebook  ( and  much more )  at  < a  href  =  "http://www.emanueleferonato.com" > emanueleferonato . com < / a >
+< / div >
