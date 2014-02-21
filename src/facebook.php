@@ -55,7 +55,8 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::__construct
    */
   public function __construct($config) {
-    if (!session_id()) {
+    if ((function_exists('session_status') 
+      && session_status() !== PHP_SESSION_ACTIVE) || !session_id()) {
       session_start();
     }
     parent::__construct($config);
