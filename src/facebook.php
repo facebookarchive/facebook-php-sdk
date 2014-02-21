@@ -55,14 +55,9 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::__construct
    */
   public function __construct($config) {
-    if (function_exists('session_status')) {
-      if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-      }
-    } else {
-      if (!session_id()) {
-        session_start();
-      }
+    if ((function_exists('session_status') 
+      && session_status() !== PHP_SESSION_ACTIVE) || !session_id()) {
+      session_start();
     }
     parent::__construct($config);
     if (!empty($config['sharedSession'])) {
