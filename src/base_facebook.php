@@ -660,21 +660,6 @@ abstract class BaseFacebook
   }
 
   /**
-   * Get a login status URL to fetch the status from Facebook.
-   *
-   * @param array $params Provide custom parameters
-   * @return string The URL for the logout flow
-   */
-  public function getLoginStatusUrl($params=array()) {
-    return $this->getLoginUrl(
-      array_merge(array(
-        'response_type' => 'code',
-        'display' => 'none',
-      ), $params)
-    );
-  }
-
-  /**
    * Make an API call.
    *
    * @return mixed The decoded response
