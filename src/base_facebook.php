@@ -906,13 +906,15 @@ abstract class BaseFacebook
    *
    * @param string $url The URL to make the request to
    * @param array $params The parameters to use for the POST body
-   * @param CurlHandler $ch Initialized curl handle
+   * @param CurlHandler $uch Initialized curl handle
    *
    * @return string The response text
    */
-  protected function makeRequest($url, $params, $ch=null) {
-    if (!$ch) {
+  protected function makeRequest($url, $params, $uch=null) {
+    if (!$uch) {
       $ch = curl_init();
+    } else {
+      $ch = & $uch;
     }
 
     $opts = self::$CURL_OPTS;
@@ -974,7 +976,11 @@ abstract class BaseFacebook
       curl_close($ch);
       throw $e;
     }
-    curl_close($ch);
+    
+    if ($uch === null) {
+      curl_close( $ch );
+	  }
+
     return $result;
   }
 
