@@ -45,8 +45,8 @@ class FacebookApiException extends Exception
     $this->result = $result;
 
     $code = 0;
-    if (isset($result['error_code']) && is_int($result['error_code'])) {
-      $code = $result['error_code'];
+    if (isset($result['error_code']) && preg_match('/^0$|^-?[1-9][0-9]*$/', $result['error_code'])) {
+      $code = (int) $result['error_code'];
     }
 
     if (isset($result['error_description'])) {
