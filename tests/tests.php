@@ -761,37 +761,6 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertFalse(strpos($facebook->getLogoutUrl(), self::SECRET));
   }
 
-  public function testLoginStatusURLDefaults() {
-    $_SERVER['HTTP_HOST'] = 'fbrell.com';
-    $_SERVER['REQUEST_URI'] = '/examples';
-    $facebook = new TransientFacebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-    $encodedUrl = rawurlencode('http://fbrell.com/examples');
-    $this->assertNotNull(strpos($facebook->getLoginStatusUrl(), $encodedUrl),
-                         'Expect the current url to exist.');
-  }
-
-  public function testLoginStatusURLCustom() {
-    $_SERVER['HTTP_HOST'] = 'fbrell.com';
-    $_SERVER['REQUEST_URI'] = '/examples';
-    $facebook = new TransientFacebook(array(
-      'appId'  => self::APP_ID,
-      'secret' => self::SECRET,
-    ));
-    $encodedUrl1 = rawurlencode('http://fbrell.com/examples');
-    $okUrl = 'http://fbrell.com/here1';
-    $encodedUrl2 = rawurlencode($okUrl);
-    $loginStatusUrl = $facebook->getLoginStatusUrl(array(
-      'ok_session' => $okUrl,
-    ));
-    $this->assertNotNull(strpos($loginStatusUrl, $encodedUrl1),
-                         'Expect the current url to exist.');
-    $this->assertNotNull(strpos($loginStatusUrl, $encodedUrl2),
-                         'Expect the custom url to exist.');
-  }
-
   public function testNonDefaultPort() {
     $_SERVER['HTTP_HOST'] = 'fbrell.com:8080';
     $_SERVER['REQUEST_URI'] = '/examples';
