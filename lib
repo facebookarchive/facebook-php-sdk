@@ -1,0 +1,6 @@
+<?php
+ 
+define("FACEBOOK_APP_ID", '113795715321151');
+define("FACEBOOK_API_KEY", '064baf5fb98de050cd7b9a001ca1988b');
+define("FACEBOOK_SECRET_KEY", '430f43c01f6dfe02c284b4545976f9ce');
+define("FACEBOOK_CANVAS_URL", 'http://apps.facebook.com/emran-test-app/');
