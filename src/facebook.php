@@ -76,14 +76,6 @@ class Facebook extends BaseFacebook
   }
 
   /**
-   * Supported keys for persistent data
-   *
-   * @var array
-   */
-  protected static $kSupportedKeys =
-    array('state', 'code', 'access_token', 'user_id');
-
-  /**
    * Initiates Shared Session
    */
   protected function initSharedSession() {
@@ -135,7 +127,7 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::setPersistentData()
    */
   protected function setPersistentData($key, $value) {
-    if (!in_array($key, self::$kSupportedKeys)) {
+    if (!self::isValidSessionKey($key)) {
       self::errorLog('Unsupported key passed to setPersistentData.');
       return;
     }
@@ -150,7 +142,7 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::getPersistentData()
    */
   protected function getPersistentData($key, $default = false) {
-    if (!in_array($key, self::$kSupportedKeys)) {
+    if (!self::isValidSessionKey($key)) {
       self::errorLog('Unsupported key passed to getPersistentData.');
       return $default;
     }
@@ -166,7 +158,7 @@ class Facebook extends BaseFacebook
    * @see BaseFacebook::clearPersistentData()
    */
   protected function clearPersistentData($key) {
-    if (!in_array($key, self::$kSupportedKeys)) {
+    if (!self::isValidSessionKey($key)) {
       self::errorLog('Unsupported key passed to clearPersistentData.');
       return;
     }

@@ -171,6 +171,14 @@ abstract class BaseFacebook
   );
 
   /**
+   * Supported keys for persistent data
+   *
+   * @var array
+   */
+  protected static $kSupportedKeys =
+    array('state', 'code', 'access_token', 'user_id');
+
+  /**
    * The Application ID.
    *
    * @var string
@@ -1479,6 +1487,16 @@ abstract class BaseFacebook
       return true;
     }
     return substr($big, -$len) === $small;
+  }
+
+  /**
+   * Validates a session key
+   *
+   * @param string
+   * @return boolean
+   */
+  public static function isValidSessionKey($key) {
+    return in_array($key, self::$kSupportedKeys);
   }
 
   /**

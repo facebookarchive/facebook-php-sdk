@@ -1823,6 +1823,18 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     $this->assertEquals('https', $fb->publicGetHttpProtocol());
   }
 
+  public function testValidatesSessionKeys() {
+    $fb = new FBValidation(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertTrue($fb::publicIsValidSessionKey('state'), '"state" should be a valid session key');
+    $this->assertTrue($fb::publicIsValidSessionKey('code'), '"code" should be a valid session key');
+    $this->assertTrue($fb::publicIsValidSessionKey('access_token'), '"access_token" should be a valid session key');
+    $this->assertTrue($fb::publicIsValidSessionKey('user_id'), '"user_id" should be a valid session key');
+    $this->assertFalse($fb::publicIsValidSessionKey('foo'), '"foo" should not be a valid session key');
+  }
+
   /**
    * @dataProvider provideEndsWith
    */
@@ -2090,5 +2102,11 @@ class FBPublicState extends TransientFacebook {
 
   public function publicGetState() {
     return $this->state;
+  }
+}
+
+class FBValidation extends TransientFacebook {
+  public static function publicIsValidSessionKey($key) {
+    return self::isValidSessionKey($key);
   }
 }
