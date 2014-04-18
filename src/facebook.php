@@ -21,7 +21,7 @@ require_once "base_facebook.php";
  * Extends the BaseFacebook class with the intent of using
  * PHP sessions to store user ids and access tokens.
  */
-class Facebook extends BaseFacebook
+class Facebook extends BaseFacebook implements BaseFacebookInterface
 {
   /**
    * Cookie prefix
@@ -134,7 +134,7 @@ class Facebook extends BaseFacebook
    *
    * @see BaseFacebook::setPersistentData()
    */
-  protected function setPersistentData($key, $value) {
+  public function setPersistentData($key, $value) {
     if (!in_array($key, self::$kSupportedKeys)) {
       self::errorLog('Unsupported key passed to setPersistentData.');
       return;
@@ -149,7 +149,7 @@ class Facebook extends BaseFacebook
    *
    * @see BaseFacebook::getPersistentData()
    */
-  protected function getPersistentData($key, $default = false) {
+  public function getPersistentData($key, $default = false) {
     if (!in_array($key, self::$kSupportedKeys)) {
       self::errorLog('Unsupported key passed to getPersistentData.');
       return $default;
@@ -165,7 +165,7 @@ class Facebook extends BaseFacebook
    *
    * @see BaseFacebook::clearPersistentData()
    */
-  protected function clearPersistentData($key) {
+  public function clearPersistentData($key) {
     if (!in_array($key, self::$kSupportedKeys)) {
       self::errorLog('Unsupported key passed to clearPersistentData.');
       return;
@@ -182,7 +182,7 @@ class Facebook extends BaseFacebook
    *
    * @see BaseFacebook::clearAllPersistentData()
    */
-  protected function clearAllPersistentData() {
+  public function clearAllPersistentData() {
     foreach (self::$kSupportedKeys as $key) {
       $this->clearPersistentData($key);
     }
