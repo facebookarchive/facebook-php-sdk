@@ -184,20 +184,51 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     // first test when equal signs are present
     $_SERVER['HTTP_HOST'] = 'www.test.com';
     $_SERVER['REQUEST_URI'] = '/unit-tests.php?one=&two=&three=';
-    $current_url = $facebook->publicGetCurrentUrl();
+    $current_url = $facebook->publicGetCurrentStrippedUrl();
     $this->assertEquals(
       'http://www.test.com/unit-tests.php?one=&two=&three=',
       $current_url,
-      'getCurrentUrl function is changing the current URL');
+      'getCurrentStrippedUrl function is changing the current URL');
 
     // now confirm that
     $_SERVER['HTTP_HOST'] = 'www.test.com';
     $_SERVER['REQUEST_URI'] = '/unit-tests.php?one&two&three';
-    $current_url = $facebook->publicGetCurrentUrl();
+    $current_url = $facebook->publicGetCurrentStrippedUrl();
     $this->assertEquals(
       'http://www.test.com/unit-tests.php?one&two&three',
       $current_url,
-      'getCurrentUrl function is changing the current URL');
+      'getCurrentStrippedUrl function is changing the current URL');
+
+    // ensure url will be stripped of values we don't want to persist
+    $_SERVER['HTTP_HOST'] = 'www.test.com';
+    $_SERVER['REQUEST_URI'] = '/unit-tests.php?code=foo&one&state=bar&two&three&signed_request=baz';
+    $current_url = $facebook->publicGetCurrentStrippedUrl();
+    $this->assertEquals(
+      'http://www.test.com/unit-tests.php?one&two&three',
+      $current_url,
+      'getCurrentStrippedUrl function did not strip values that should not persist');
+  }
+
+  public function testCanCustomizeGetCurrentURL() {
+    $facebook = new FBCustomGetCurrentURLFacebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+
+    // fake the HPHP $_SERVER globals
+    $current_url = $facebook->publicGetCurrentUrl();
+    $this->assertEquals(
+      'https://foo.bar/baz.php?code=foo&one&state=bar&two&three&signed_request=baz',
+      $current_url,
+      'overwritten getCurrentUrl function is changing the current URL');
+
+    // ensure url will be stripped of values we don't want to persist
+    $current_url = $facebook->publicGetCurrentStrippedUrl();
+    $this->assertEquals(
+      'https://foo.bar/baz.php?one&two&three',
+      $current_url,
+      'getCurrentStrippedUrl function did not strip values that should not persist ' .
+        ' when getCurrentUrl is overwritten');
   }
 
   public function testGetLoginURL() {
@@ -1225,7 +1256,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   public function testNullRedirectURIUsesCurrentURL() {
     $methods_to_stub = array(
       '_oauthRequest',
-      'getCurrentUrl',
+      'getCurrentStrippedUrl',
     );
     $constructor_args = array(array(
       'appId'  => self::APP_ID,
@@ -1240,7 +1271,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       ->will($this->returnValue("access_token=$access_token"));
     $stub
       ->expects($this->once())
-      ->method('getCurrentUrl');
+      ->method('getCurrentStrippedUrl');
     $this->assertEquals(
       $access_token, $stub->publicGetAccessTokenFromCode('c'));
   }
@@ -1248,7 +1279,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
   public function testNullRedirectURIAllowsEmptyStringForCookie() {
     $methods_to_stub = array(
       '_oauthRequest',
-      'getCurrentUrl',
+      'getCurrentStrippedUrl',
     );
     $constructor_args = array(array(
       'appId'  => self::APP_ID,
@@ -1263,7 +1294,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       ->will($this->returnValue("access_token=$access_token"));
     $stub
       ->expects($this->never())
-      ->method('getCurrentUrl');
+      ->method('getCurrentStrippedUrl');
     $this->assertEquals(
       $access_token, $stub->publicGetAccessTokenFromCode('c', ''));
   }
@@ -2038,6 +2069,21 @@ class FBGetCurrentURLFacebook extends TransientFacebook {
   public function publicGetCurrentUrl() {
     return $this->getCurrentUrl();
   }
+  public function publicGetCurrentStrippedUrl() {
+    return $this->getCurrentStrippedUrl();
+  }
+}
+
+class FBCustomGetCurrentURLFacebook extends TransientFacebook {
+  protected function getCurrentUrl() {
+    return 'https://foo.bar/baz.php?code=foo&one&state=bar&two&three&signed_request=baz';
+  }
+  public function publicGetCurrentUrl() {
+    return $this->getCurrentUrl();
+  }
+  public function publicGetCurrentStrippedUrl() {
+    return $this->getCurrentStrippedUrl();
+  }
 }
 
 class FBPublicCookie extends TransientFacebook {
@@ -2058,14 +2104,13 @@ class FBPublicCookie extends TransientFacebook {
   }
 }
 
-class FBRewrite extends Facebook{
+class FBRewrite extends Facebook {
 
-  public function uncacheSignedRequest(){
+  public function uncacheSignedRequest() {
     $this->signedRequest = null;
   }
 
-  public function uncache()
-  {
+  public function uncache() {
     $this->user = null;
     $this->signedRequest = null;
     $this->accessToken = null;

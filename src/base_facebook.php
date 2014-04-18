@@ -617,7 +617,7 @@ abstract class BaseFacebook
    */
   public function getLoginUrl($params=array()) {
     $this->establishCSRFTokenState();
-    $currentUrl = $this->getCurrentUrl();
+    $currentUrl = $this->getCurrentStrippedUrl();
 
     // if 'scope' is passed as an array, convert to comma separated list
     $scopeParams = isset($params['scope']) ? $params['scope'] : null;
@@ -653,7 +653,7 @@ abstract class BaseFacebook
       'www',
       'logout.php',
       array_merge(array(
-        'next' => $this->getCurrentUrl(),
+        'next' => $this->getCurrentStrippedUrl(),
         'access_token' => $this->getUserAccessToken(),
       ), $params)
     );
@@ -782,7 +782,7 @@ abstract class BaseFacebook
     }
 
     if ($redirect_uri === null) {
-      $redirect_uri = $this->getCurrentUrl();
+      $redirect_uri = $this->getCurrentStrippedUrl();
     }
 
     try {
@@ -1253,15 +1253,25 @@ abstract class BaseFacebook
   }
 
   /**
-   * Returns the Current URL, stripping it of known FB parameters that should
-   * not persist.
+   * Returns the current URL. This can be overwritten by the developer
+   * if their framework has custom URL detection/creation.
    *
    * @return string The current URL
    */
   protected function getCurrentUrl() {
     $protocol = $this->getHttpProtocol() . '://';
     $host = $this->getHttpHost();
-    $currentUrl = $protocol.$host.$_SERVER['REQUEST_URI'];
+    return $protocol.$host.$_SERVER['REQUEST_URI'];
+  }
+
+  /**
+   * Returns the current URL, stripping it of known FB parameters that should
+   * not persist.
+   *
+   * @return string The current stripped URL
+   */
+  protected function getCurrentStrippedUrl() {
+    $currentUrl = $this->getCurrentUrl();
     $parts = parse_url($currentUrl);
 
     $query = '';
@@ -1283,12 +1293,12 @@ abstract class BaseFacebook
     // use port if non default
     $port =
       isset($parts['port']) &&
-      (($protocol === 'http://' && $parts['port'] !== 80) ||
-       ($protocol === 'https://' && $parts['port'] !== 443))
+      (($parts['scheme'] === 'http' && $parts['port'] !== 80) ||
+       ($parts['scheme'] === 'https' && $parts['port'] !== 443))
       ? ':' . $parts['port'] : '';
 
     // rebuild
-    return $protocol . $parts['host'] . $port . $parts['path'] . $query;
+    return $parts['scheme'] . '://' . $parts['host'] . $port . $parts['path'] . $query;
   }
 
   /**
