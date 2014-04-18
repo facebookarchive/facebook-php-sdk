@@ -79,6 +79,7 @@ $user = $facebook->getUser();
 [examples]: /examples/example.php
 [API]: http://developers.facebook.com/docs/api
 
+
 Tests
 -----
 
@@ -91,7 +92,9 @@ test case.
 
 The tests can be executed by using this command from the base directory:
 
-    phpunit --stderr --bootstrap tests/bootstrap.php tests/tests.php
+```bash
+phpunit
+```
 
 
 Contributing
