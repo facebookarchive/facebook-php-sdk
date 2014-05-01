@@ -8,6 +8,12 @@ See the [Facebook Developers](https://developers.facebook.com/docs/php/) site
 -----
 
 Facebook PHP SDK (v.3.2.3)
+==========================
+
+[![Build Status](http://img.shields.io/travis/facebook/facebook-php-sdk.svg)](https://travis-ci.org/facebook/facebook-php-sdk)
+[![Total Downloads](http://img.shields.io/packagist/dm/facebook/php-sdk.svg)](https://packagist.org/packages/facebook/php-sdk)
+[![Latest Stable Version](http://img.shields.io/packagist/v/facebook/php-sdk.svg)](https://packagist.org/packages/facebook/php-sdk)
+
 
 The [Facebook Platform](http://developers.facebook.com/) is
 a set of APIs that make your app more social.
@@ -51,7 +57,7 @@ if ($user) {
 You can make api calls by choosing the `HTTP method` and setting optional `parameters`:
 ```php
 $facebook->api('/me/feed/', 'post', array(
-	'message' => 'I want to display this message on my wall'
+  'message' => 'I want to display this message on my wall'
 ));
 ```
 
