@@ -1,8 +1,6 @@
 ### New SDK Released
 
-We've released version 4 of the Facebook SDK for PHP here: [https://github
-.com/facebook/facebook-php-sdk-v4](https://github
-.com/facebook/facebook-php-sdk-v4)
+We've released version 4 of the Facebook SDK for PHP here: [https://github.com/facebook/facebook-php-sdk-v4](https://github.com/facebook/facebook-php-sdk-v4)
 Please use the new repository for new projects and contributions.
 See the [Facebook Developers](https://developers.facebook.com/docs/php/) site
  for documentation.
