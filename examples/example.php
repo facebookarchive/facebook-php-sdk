@@ -46,7 +46,8 @@ if ($user) {
 if ($user) {
   $logoutUrl = $facebook->getLogoutUrl();
 } else {
-  $statusUrl = $facebook->getLoginStatusUrl();
+  //getLoginStatusUrl() is Depricated and will show error if used
+  //$statusUrl = $facebook->getLoginStatusUrl();
   $loginUrl = $facebook->getLoginUrl();
 }
 
@@ -77,10 +78,7 @@ $naitik = $facebook->api('/naitik');
     <?php if ($user): ?>
       <a href="<?php echo $logoutUrl; ?>">Logout</a>
     <?php else: ?>
-      <div>
-        Check the login status using OAuth 2.0 handled by the PHP SDK:
-        <a href="<?php echo $statusUrl; ?>">Check the login status</a>
-      </div>
+      
       <div>
         Login using OAuth 2.0 handled by the PHP SDK:
         <a href="<?php echo $loginUrl; ?>">Login with Facebook</a>
