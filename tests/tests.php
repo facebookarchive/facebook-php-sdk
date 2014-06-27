@@ -594,7 +594,7 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
       $this->fail('Should not get here.');
     } catch(FacebookApiException $e) {
       // means the server got the access token
-      $msg = 'invalid_request: An active access token must be used '.
+      $msg = 'OAuthException: An active access token must be used '.
              'to query information about the current user.';
       $this->assertEquals($msg, (string) $e,
                           'Expect the invalid session message.');
