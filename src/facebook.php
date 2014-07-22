@@ -51,12 +51,13 @@ class Facebook extends BaseFacebook
    * accepts "sharedSession" as a boolean to turn on a secondary
    * cookie for environments with a shared session (that is, your app
    * shares the domain with other apps).
+   * @param boolean $native_session To call session_start() or not at all
    *
    * @see BaseFacebook::__construct
    */
-  public function __construct($config) {
-    if ((function_exists('session_status') 
-      && session_status() !== PHP_SESSION_ACTIVE) || !session_id()) {
+  public function __construct($config, $native_session = true) {
+    if ($native_session && ((function_exists('session_status')
+      && session_status() !== PHP_SESSION_ACTIVE) || !session_id())) {
       session_start();
     }
     parent::__construct($config);
