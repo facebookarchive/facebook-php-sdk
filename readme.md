@@ -24,6 +24,8 @@ Usage
 The [examples][examples] are a good place to start. The minimal you'll need to
 have is:
 ```php
+<?php
+
 require 'facebook-php-sdk/src/facebook.php';
 
 $facebook = new Facebook(array(
@@ -37,6 +39,8 @@ $user = $facebook->getUser();
 
 To make [API][API] calls:
 ```php
+<?php
+
 if ($user) {
   try {
     // Proceed knowing you have a logged in user who's authenticated.
@@ -50,6 +54,8 @@ if ($user) {
 
 You can make api calls by choosing the `HTTP method` and setting optional `parameters`:
 ```php
+<?php
+
 $facebook->api('/me/feed/', 'post', array(
 	'message' => 'I want to display this message on my wall'
 ));
@@ -58,6 +64,8 @@ $facebook->api('/me/feed/', 'post', array(
 
 Login or logout url will be needed depending on current user state.
 ```php
+<?php
+
 if ($user) {
   $logoutUrl = $facebook->getLogoutUrl();
 } else {
@@ -72,6 +80,8 @@ With Composer:
 - The example will look like
 
 ```php
+<?php
+
 if (($loader = require_once __DIR__ . '/vendor/autoload.php') == null)  {
   die('Vendor directory not found, Please run composer install.');
 }
