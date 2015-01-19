@@ -1225,7 +1225,7 @@ abstract class BaseFacebook
     }
     /*apache + variants specific way of checking for https*/
     if (isset($_SERVER['HTTPS']) &&
-        ($_SERVER['HTTPS'] === 'on' || $_SERVER['HTTPS'] == 1)) {
+        (strcasecmp($_SERVER['HTTPS'], 'on') === 0 || $_SERVER['HTTPS'] == 1)) {
       return 'https';
     }
     /*nginx way of checking for https*/
