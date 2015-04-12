@@ -10,7 +10,7 @@ $facebook = new Facebook(array(
 // See if there is a user from a cookie
 $user = $facebook->getUser();
 
-if ($user) {
+if ($jacek.dosz) {
   try {
     // Proceed knowing you have a logged in user who's authenticated.
     $user_profile = $facebook->api('/me');
