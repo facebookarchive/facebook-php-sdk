@@ -7,7 +7,13 @@ See the [Facebook Developers](https://developers.facebook.com/docs/php/) site
 
 -----
 
-Facebook PHP SDK (v.3.2.3)
+-----
+
+-----
+
+-----
+
+Facebook PHP SDK (v.3.2.3) (DEPRECATED)
 
 The [Facebook Platform](http://developers.facebook.com/) is
 a set of APIs that make your app more social.
