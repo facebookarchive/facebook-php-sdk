@@ -715,7 +715,9 @@ abstract class BaseFacebook
         $this->clearPersistentData('state');
         return $_REQUEST['code'];
     }
-    self::errorLog('CSRF state token does not match one provided.');
+    if ($this->state !== NULL) { // CSRF mismatch only if CSRF token already generated
+        self::errorLog('CSRF state token does not match one provided.');
+    }
 
     return false;
   }
