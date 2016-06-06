@@ -1,0 +1,17 @@
+
+     -  $facebook = new Facebook(...);
+     -  $user = $facebook->getUser();
+     -  if ($user) {
+     -     // proceed knowing you have a logged in user who's authenticated
+     -  } else {
+     -     // proceed knowing you require user login and/or authentication
+     -  }
+     -  @0072016/sawyer
+     -  PHP app
+     -  Facebook SDK
+     -  ChromeWeb APP 4.4
+     -  foo.gradle@gmail.com
+     -  06
+     -  05
+     -  2016
+     
