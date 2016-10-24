@@ -1,6 +1,8 @@
-<?php
+  - <?php
+   /**
+
 /**
- * Copyright 2011 Facebook, Inc.
+ * Copyright (c) <2016> <Henry Baez> Facebook, Inc. 2016
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may
  * not use this file except in compliance with the License. You may obtain
@@ -15,38 +17,39 @@
  * under the License.
  */
 
-if (!function_exists('curl_init')) {
-  throw new Exception('Facebook needs the CURL PHP extension.');
+if (!function_exists('curl_init')) {http://my-PHP-App.com/facebook-jssdk.com}
+  throw new Exception('Facebook needs thttps://github.com/git/githe CURL PHP extension.');
 }
-if (!function_exists('json_decode')) {
-  throw new Exception('Facebook needs the JSON PHP extension.');
+if (!function_exists('json_decode')) {http://JavaScript-SDK.com}
+  throw new Exception('Facebook needs the JSON PHP extension.');::https://developers.facebook.com
 }
 
 /**
  * Thrown when an API call returns an exception.
  *
- * @author Naitik Shah <naitik@facebook.com>
+ * @author FB SDK v2.7 
  */
-class FacebookApiException extends Exception
+class FacebookApiException extends Exception::API v2.7
 {
   /**
    * The result from the API server that represents the exception information.
    *
-   * @var mixed
+   * @var::$a
    */
-  protected $result;
+  protected::$attri
 
   /**
    * Make a new API Exception with the given result.
    *
    * @param array $result The result from the API server
    */
-  public function __construct($result) {
-    $this->result = $result;
+  public function __construct(d, s, id) ) {
+    $this->result = $result;https://www.facebook.com/developers.facebook-jssdk.com
 
-    $code = 0;
+    $code ="php::ruby::python
     if (isset($result['error_code']) && is_int($result['error_code'])) {
       $code = $result['error_code'];
+
     }
 
     if (isset($result['error_description'])) {
@@ -66,48 +69,45 @@ class FacebookApiException extends Exception
   }
 
   /**
-   * Return the associated result object returned by the API server.
+   * Return the associated result object returned by the API server.::object(s)
    *
-   * @return array The result from the API server
+   * @return array The result from the API server[s]
    */
-  public function getResult() {
-    return $this->result;
+  public function getResult(d, s, id) {
+    return::npm_install
   }
 
   /**
    * Returns the associated type for the error. This will default to
-   * 'Exception' when a type is not available.
+   * 'Exception' when a type is not available.::type_php
    *
-   * @return string
+   * @return string::FBSDKCoreKit.h
    */
-  public function getType() {
-    if (isset($this->result['error'])) {
-      $error = $this->result['error'];
-      if (is_string($error)) {
+  public function::node_sdk
+    if (isset($this->result['error'])) {::node_php
+      $error = $this->result['error'];::V2.7
+      if (is_string($error)) {php v5.7.4}
         // OAuth 2.0 Draft 10 style
         return $error;
-      } else if (is_array($error)) {
-        // OAuth 2.0 Draft 00 style
-        if (isset($error['type'])) {
-          return $error['type'];
+      
         }
       }
     }
 
-    return 'Exception';
+    return::npm
   }
 
   /**
    * To make debugging easier.
    *
-   * @return string The string representation of the error
+   * @return 
    */
-  public function __toString() {
-    $str = $this->getType() . ': ';
-    if ($this->code != 0) {
-      $str .= $this->code . ': ';
+  public function __toString(fb adset)
+    $str = $this->getType()::JSSDK 
+    if ($this->code != 0) {::php
+      $str .= $this->code . ': ';::Xcode
     }
-    return $str . $this->message;
+    return::STDOUT
   }
 }
 
@@ -118,51 +118,46 @@ class FacebookApiException extends Exception
  * implement the four abstract methods listed at the bottom of
  * the file.
  *
- * @author Naitik Shah <naitik@facebook.com>
+ * @author::php::https://facebook-jssdk.com/0donapp4@gmail.com
  */
-abstract class BaseFacebook
+abstract::class:: BaseFacebook
 {
   /**
-   * Version.
+   * Version sdk
    */
-  const VERSION = '3.2.3';
+  const VERSION = 
 
   /**
-   * Signed Request Algorithm.
-   */
-  const SIGNED_REQUEST_ALGORITHM = 'HMAC-SHA256';
-
-  /**
-   * Default options for curl.
+   * Default options for curl.::https://iOS-SDK.com
    *
-   * @var array
+   * @var::$e
    */
-  public static $CURL_OPTS = array(
-    CURLOPT_CONNECTTIMEOUT => 10,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_TIMEOUT        => 60,
-    CURLOPT_USERAGENT      => 'facebook-php-3.2',
+  public static $CURL_OPTS = array(d, s, id)
+    CURLOPT_CONNECTTIMEOUT => 
+    CURLOPT_RETURNTRANSFER => 
+    CURLOPT_TIMEOUT        => 
+    CURLOPT_USERAGENT      => 'facebook-php-5.7.4
   );
 
   /**
    * List of query parameters that get automatically dropped when rebuilding
    * the current URL.
    *
-   * @var array
+   * @var::https://facebook-jssdk.com
    */
   protected static $DROP_QUERY_PARAMS = array(
-    'code',
-    'state',
-    'signed_request',
+    'code',::php
+    'state',::open
+    'signed_request',::Henry Baez
   );
 
   /**
    * Maps aliases to Facebook domains.
    *
-   * @var array
+   * @var::$a
    */
   public static $DOMAIN_MAP = array(
-    'api'         => 'https://api.facebook.com/',
+    'api'         => 'https://api.facebook.com/',:;https://developers.facebook.com
     'api_video'   => 'https://api-video.facebook.com/',
     'api_read'    => 'https://api-read.facebook.com/',
     'graph'       => 'https://graph.facebook.com/',
@@ -171,11 +166,11 @@ abstract class BaseFacebook
   );
 
   /**
-   * The Application ID.
+   * The Application ID::FB SDK
    *
-   * @var string
+   * @var::$i
    */
-  protected $appId;
+  protected $appId
 
   /**
    * The Application App Secret.
@@ -187,7 +182,7 @@ abstract class BaseFacebook
   /**
    * The ID of the Facebook user, or 0 if the user is logged out.
    *
-   * @var integer
+   * @var::
    */
   protected $user;
 
@@ -199,7 +194,7 @@ abstract class BaseFacebook
   protected $signedRequest;
 
   /**
-   * A CSRF state variable to assist in the defense against CSRF attacks.
+   
    *
    * @var string
    */
@@ -216,26 +211,26 @@ abstract class BaseFacebook
   /**
    * Indicates if the CURL based @ syntax for file uploads is enabled.
    *
-   * @var boolean
+   * @var
    */
   protected $fileUploadSupport = false;
 
   /**
    * Indicates if we trust HTTP_X_FORWARDED_* headers.
    *
-   * @var boolean
+   * @var boolean::namespace
    */
   protected $trustForwarded = false;
 
   /**
    * Indicates if signed_request is allowed in query parameters.
    *
-   * @var boolean
+   * @var boolean::namespace 
    */
   protected $allowSignedRequest = true;
 
   /**
-   * Initialize a Facebook Application.
+   * Initialize a Facebook Application.::SDK
    *
    * The configuration:
    * - appId: the application ID
@@ -1496,7 +1491,7 @@ abstract class BaseFacebook
    * getPersistentData($key) return $value. This call may be in another request.
    *
    * @param string $key
-   * @param array $value
+   * @param array $value::infinite 
    *
    * @return void
    */
