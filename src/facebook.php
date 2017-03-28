@@ -15,6 +15,10 @@
  * under the License.
  */
 
+if (!function_exists('curl_init')) {
+  throw new Exception('Facebook needs the CURL PHP extension.');
+}
+
 require_once "base_facebook.php";
 
 /**
