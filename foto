@@ -1,0 +1,28 @@
+<?php
+require_once("/path/to/facebook_php_sdk/facebook.php"); // set the right path
+ 
+$config = array();
+$config['appId'] = '427186227316959';
+$config['secret'] = 'aa04476f04e1f0a12bc9a2520240bf4f';
+$config['fileUpload'] = false; // optional
+$fb = new Facebook($config);
+ 
+$params = array(
+  // this is the access token for Fan Page
+  "access_token" => "CAAGEhgtVCN8BANFduphl0TQ0I1lyPXCn7Fcs0dD2d2Sw6WOWs3VyzyIpRQKiFB5JRs6mYU2GWoTNYXhMAlU3HLSk0dbhgkOs5cmX5QFizbuXXsjeWwPGb1af3FjO5MJZBvBEhw5S7ZARgpgZC9VpqTI1MiQcwp9tnMMvz9f0piOZAavqciApymgqZBaM5dJkQKair0OEw7AZDZD",
+  "message" => "Like :)",
+  "link" => "http://www.pontikis.net/blog/auto_post_on_facebook_with_php",
+  "picture" => "https://fbcdn-photos-b-a.akamaihd.net/hphotos-ak-prn1/851559_141741536009396_2055081482_n.gif",
+  "name" => "Gifs para Facebook",
+  "caption" => "https://www.facebook.com/GifsparaFace",
+  "description" => "Para mais acesse: https://www.facebook.com/GifsparaFace"
+);
+ 
+try {
+  // 466400200079875 is Facebook id of Fan page https://www.facebook.com/pontikis.net
+  $ret = $fb->api('/175919099283502/feed', 'POST', $params);
+  echo 'Successfully posted to Facebook Fan Page';
+} catch(Exception $e) {
+  echo $e->getMessage();
+}
+?>
