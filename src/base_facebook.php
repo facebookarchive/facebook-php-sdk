@@ -112,6 +112,49 @@ class FacebookApiException extends Exception
 }
 
 /**
+ * Required methods when extending from the abstract BaseFacebook class
+ *
+ * @see https://developers.facebook.com/docs/reference/php/
+ */
+interface BaseFacebookInterface
+{
+  /**
+   * Stores the given key-value pair, so that future calls to
+   * getPersistentData for a given key return the related value.
+   *
+   * @param string
+   * @param mixed
+   * @return void
+   */
+  public function setPersistentData($key, $value);
+
+  /**
+   * Get the stored value for a given key which was set with
+   * BaseFacebook::setPersistentData.
+   *
+   * @param string
+   * @param boolean
+   * @return mixed
+   */
+  public function getPersistentData($key, $default = null);
+
+  /**
+   * Clears the stored value for a given key.
+   *
+   * @param string
+   * @return void
+   */
+  public function clearPersistentData($key);
+
+  /**
+   * Clears all stored key-value pairs.
+   *
+   * @return void
+   */
+  public function clearAllPersistentData();
+}
+
+/**
  * Provides access to the Facebook Platform.  This class provides
  * a majority of the functionality needed, but the class is abstract
  * because it is designed to be sub-classed.  The subclass must
