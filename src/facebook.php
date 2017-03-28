@@ -225,4 +225,25 @@ class Facebook extends BaseFacebook
     }
     return implode('_', $parts);
   }
+  
+  
+  /*
+  use this function you can check facebook page like status if page is liked its return true otherwise false.
+  */
+   public function check_page_like($page_id)
+  {
+      
+        $cpk_status = "";
+        $cpk_status = $this->api("/me/likes?target_id=$page_id");
+        $cpk_status = $cpk_status["data"][0]["id"];
+        
+        if($cpk_status)
+        {
+            return "true";
+        }else
+        {
+            return "false";
+        }
+        
+  
 }
