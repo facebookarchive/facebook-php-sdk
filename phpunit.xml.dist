@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+        bootstrap="tests/bootstrap.php"
+        stderr="true"
+        colors="true"
+        verbose="true">
+    <testsuites>
+        <testsuite name="Facebook SDK Test Suite">
+            <file>tests/tests.php</file>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src</directory>
+        </whitelist>
+    </filter>
+</phpunit>
