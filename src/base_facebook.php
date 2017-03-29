@@ -491,10 +491,8 @@ abstract class BaseFacebook
       }
 
       // signed request states there's no access token, so anything
-      // stored should be cleared.
-      $this->clearAllPersistentData();
-      return false; // respect the signed request's data, even
-                    // if there's an authorization code or something else
+      // stored should be cleared even if the COOKIE put by JS SDK.
+      $this->destroySession();
     }
 
     $code = $this->getCode();
