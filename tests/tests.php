@@ -40,6 +40,14 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
     );
   }
 
+  private static function kValidSignedRequestArray(array $data) {
+    $facebook = new FBPublic(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    return $facebook->publicMakeSignedRequest($data);
+  }
+
   private static function kNonTosedSignedRequest() {
     $facebook = new FBPublic(array(
       'appId'  => self::APP_ID,
@@ -414,6 +422,32 @@ class PHPSDKTestCase extends PHPUnit_Framework_TestCase {
 
     $this->assertNotEquals('Hello sweetie', $facebook->getAccessToken(),
                         'Failed to clear access token');
+  }
+
+  public function testSetSigedRequest() {
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $this->assertFalse($facebook->setSignedRequest('Some not valid signed request string'),
+                                                   'setSignedRequest should fail when parseSignedRequest fails');
+
+    $signedRequestData = [
+      'user_id'     => self::TEST_USER,
+      'oauth_token' => 'Don\'t look!',
+      'code'        => 'some arbitrary code'
+    ];
+    $facebook = new Facebook(array(
+      'appId'  => self::APP_ID,
+      'secret' => self::SECRET,
+    ));
+    $facebook->setSignedRequest(self::kValidSignedRequestArray($signedRequestData));
+    $signedRequestOutData = $facebook->getSignedRequest();
+
+    // Ignore values added internally
+    unset($signedRequestOutData['algorithm'], $signedRequestOutData['issued_at']);
+    $this->assertEquals($signedRequestOutData, $signedRequestData,
+                        'Signed request data is different from the The data injected via setSignedRequest');
   }
 
   public function testGetSignedRequestFromCookie() {
