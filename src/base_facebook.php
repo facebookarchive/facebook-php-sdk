@@ -418,10 +418,12 @@ abstract class BaseFacebook
     }
 
     $this->destroySession();
+    $access_token = $response_params['access_token'];
+    $this->setPersistentData('access_token', $access_token);
+    // swap the access token. The previous token is now invalid
+    $this->setAccessToken($access_token);
 
-    $this->setPersistentData(
-      'access_token', $response_params['access_token']
-    );
+    return $access_token;
   }
 
   /**
@@ -776,7 +778,7 @@ abstract class BaseFacebook
    * @return mixed An access token exchanged for the authorization code, or
    *               false if an access token could not be generated.
    */
-  protected function getAccessTokenFromCode($code, $redirect_uri = null) {
+  public function getAccessTokenFromCode($code, $redirect_uri = null) {
     if (empty($code)) {
       return false;
     }
